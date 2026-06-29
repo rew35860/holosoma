@@ -235,6 +235,13 @@ def preprocess_motion_data(
     if z_min >= mat_height:
         # On a mat.
         z_min -= mat_height
+
+    # Save raw frame-0 hand z BEFORE we mutate human_joints — used to pick the
+    # right object z-scaling branch below. mujoco-ordered wrist indices come from
+    # interact2mimic's smpl_2_mujoco_new: L_Wrist=17, R_Wrist=36.
+    L_WRIST_IDX, R_WRIST_IDX = 17, 36
+    hand_z_min_raw = min(human_joints[0, L_WRIST_IDX, 2], human_joints[0, R_WRIST_IDX, 2])
+
     human_joints[:, :, 2] -= z_min
 
     # Scale human joints
@@ -242,9 +249,26 @@ def preprocess_motion_data(
 
     if object_poses is not None:
         object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale
-        object_z0 = object_poses[0, -1]
-        dz_scale = (object_poses[:, -1] - object_z0) * scale
-        object_poses[:, -1] = object_z0 + dz_scale
+
+        # Object z-scaling: two regimes
+        #  - object on the floor at frame 0 (OMOMO carry): preserve object_z0 so
+        #    the un-scaled mesh's bottom stays anchored to the floor.
+        #  - object already in hand at frame 0 (HUMOTO carry-at-chest): scale z
+        #    symmetrically with the human so the object stays in the scaled hand.
+        # Picked by hand-to-object proximity at frame 0 (sub-15cm = in-hand).
+        in_hand_threshold = 0.15
+        obj_z0 = object_poses[0, -1]
+        # Experiment override: HOLOSOMA_FORCE_FLOOR_REST=1 forces the floor-rest
+        # branch (preserve object_z0, don't z-scale) to test whether a tall
+        # floor-standing object stops sinking.
+        _force_floor_rest = os.environ.get("HOLOSOMA_FORCE_FLOOR_REST") == "1"
+        if (not _force_floor_rest) and abs(obj_z0 - hand_z_min_raw) < in_hand_threshold:
+            # in-hand: scale z fully
+            object_poses[:, -1] = (object_poses[:, -1] - z_min) * scale
+        else:
+            # floor-resting: preserve z0 (original OMOMO behavior)
+            dz_scale = (object_poses[:, -1] - obj_z0) * scale
+            object_poses[:, -1] = obj_z0 + dz_scale
 
         object_moving_frame_idx = extract_object_first_moving_frame(object_poses)
 
