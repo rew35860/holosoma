@@ -226,6 +226,91 @@ JOINTS_MAPPINGS = {
         "L_Wrist": "left_rubber_hand_link",
         "R_Wrist": "right_rubber_hand_link",
     },
+    # Dexterous variant: same as ("smplh","g1") + left thumb/pinky fingertip
+    # targets. Use with --data_format smplh_dex + the g1_29dof_dexfinger model.
+    ("smplh_dex", "g1"): {
+        "Pelvis": "pelvis_contour_link",
+        "L_Hip": "left_hip_pitch_link",
+        "R_Hip": "right_hip_pitch_link",
+        "L_Knee": "left_knee_link",
+        "R_Knee": "right_knee_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Ankle": "left_ankle_intermediate_1_link",
+        "R_Ankle": "right_ankle_intermediate_1_link",
+        "L_Toe": "left_ankle_roll_sphere_5_link",
+        "R_Toe": "right_ankle_roll_sphere_5_link",
+        "L_Wrist": "left_rubber_hand_link",
+        "R_Wrist": "right_rubber_hand_link",
+        "L_Thumb3": "left_thumb_link",
+        "L_Pinky3": "left_pinky_link",
+    },
+    # Wuji dexterous hands (both) grafted onto the G1 in g1_29dof_wuji.xml.
+    # Wrists map to the wuji palms (rubber mittens removed); 10 fingertips map
+    # to the wuji distal links. Use with --data_format smplh_wuji.
+    ("smplh_wuji", "g1"): {
+        "Pelvis": "pelvis_contour_link",
+        "L_Hip": "left_hip_pitch_link",
+        "R_Hip": "right_hip_pitch_link",
+        "L_Knee": "left_knee_link",
+        "R_Knee": "right_knee_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Ankle": "left_ankle_intermediate_1_link",
+        "R_Ankle": "right_ankle_intermediate_1_link",
+        "L_Toe": "left_ankle_roll_sphere_5_link",
+        "R_Toe": "right_ankle_roll_sphere_5_link",
+        "L_Wrist": "wj_left_palm_link",
+        "R_Wrist": "wjr_right_palm_link",
+        "L_Thumb3": "wj_left_finger1_link4",
+        "L_Index3": "wj_left_finger2_link4",
+        "L_Middle3": "wj_left_finger3_link4",
+        "L_Ring3": "wj_left_finger4_link4",
+        "L_Pinky3": "wj_left_finger5_link4",
+        "R_Thumb3": "wjr_right_finger1_link4",
+        "R_Index3": "wjr_right_finger2_link4",
+        "R_Middle3": "wjr_right_finger3_link4",
+        "R_Ring3": "wjr_right_finger4_link4",
+        "R_Pinky3": "wjr_right_finger5_link4",
+    },
+    # Upper-body-only: interaction mesh spans ONLY a pelvis anchor + arms/wrists
+    # (no hip/knee/ankle/toe), so the Laplacian has zero lower-body vertices.
+    # Pair with --retargeter.q-a-init-idx 15 (freeze base+legs+waist) and
+    # --retargeter.no-activate-foot-sticking. (issue #102 upper-body recipe)
+    ("smplh_upper", "g1"): {
+        "Pelvis": "pelvis_contour_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Wrist": "left_rubber_hand_link",
+        "R_Wrist": "right_rubber_hand_link",
+    },
+    # Wuji welded-finger model (Phase 1 decoupling): FULL body (legs for
+    # walking) + wrists -> wuji palms. No fingertip targets — fingers are
+    # welded and owned by a separate hand retargeter. Use --data_format
+    # smplh_wuji_body with g1_29dof_wuji_welded(.urdf), constraints ON.
+    ("smplh_wuji_body", "g1"): {
+        "Pelvis": "pelvis_contour_link",
+        "L_Hip": "left_hip_pitch_link",
+        "R_Hip": "right_hip_pitch_link",
+        "L_Knee": "left_knee_link",
+        "R_Knee": "right_knee_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Ankle": "left_ankle_intermediate_1_link",
+        "R_Ankle": "right_ankle_intermediate_1_link",
+        "L_Toe": "left_ankle_roll_sphere_5_link",
+        "R_Toe": "right_ankle_roll_sphere_5_link",
+        "L_Wrist": "wj_left_palm_link",
+        "R_Wrist": "wjr_right_palm_link",
+    },
     ("smplh", "t1"): {
         "Pelvis": "Trunk",
         "L_Hip": "Hip_Pitch_Left",
@@ -300,6 +385,10 @@ JOINTS_MAPPINGS = {
 TOE_NAMES_BY_FORMAT = {
     "lafan": ["LeftToeBase", "RightToeBase"],
     "smplh": ["L_Toe", "R_Toe"],
+    "smplh_dex": ["L_Toe", "R_Toe"],
+    "smplh_wuji": ["L_Toe", "R_Toe"],
+    "smplh_upper": ["L_Toe", "R_Toe"],
+    "smplh_wuji_body": ["L_Toe", "R_Toe"],
     "mocap": ["LeftToeBase", "RightToeBase"],
     "smplx": ["L_Foot", "R_Foot"],
 }
@@ -326,6 +415,10 @@ DATA_FORMAT_CONSTANTS: dict[str, FormatConstants] = {
 DEMO_JOINTS_REGISTRY: dict[str, list[str]] = {
     "lafan": LAFAN_DEMO_JOINTS,
     "smplh": SMPLH_DEMO_JOINTS,
+    "smplh_dex": SMPLH_DEMO_JOINTS,  # dexterous variant — same joints, finger mapping differs
+    "smplh_wuji": SMPLH_DEMO_JOINTS,  # Wuji-hands variant — same joints, maps 10 fingertips
+    "smplh_upper": SMPLH_DEMO_JOINTS,  # upper-body-only — mapping drops lower body
+    "smplh_wuji_body": SMPLH_DEMO_JOINTS,  # wuji welded-finger full-body
     "mocap": MOCAP_DEMO_JOINTS,
     "smplx": SMPLX_DEMO_JOINTS,
 }
