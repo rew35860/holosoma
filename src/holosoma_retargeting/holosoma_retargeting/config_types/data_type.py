@@ -226,27 +226,6 @@ JOINTS_MAPPINGS = {
         "L_Wrist": "left_rubber_hand_link",
         "R_Wrist": "right_rubber_hand_link",
     },
-    # Dexterous variant: same as ("smplh","g1") + left thumb/pinky fingertip
-    # targets. Use with --data_format smplh_dex + the g1_29dof_dexfinger model.
-    ("smplh_dex", "g1"): {
-        "Pelvis": "pelvis_contour_link",
-        "L_Hip": "left_hip_pitch_link",
-        "R_Hip": "right_hip_pitch_link",
-        "L_Knee": "left_knee_link",
-        "R_Knee": "right_knee_link",
-        "L_Shoulder": "left_shoulder_roll_link",
-        "R_Shoulder": "right_shoulder_roll_link",
-        "L_Elbow": "left_elbow_link",
-        "R_Elbow": "right_elbow_link",
-        "L_Ankle": "left_ankle_intermediate_1_link",
-        "R_Ankle": "right_ankle_intermediate_1_link",
-        "L_Toe": "left_ankle_roll_sphere_5_link",
-        "R_Toe": "right_ankle_roll_sphere_5_link",
-        "L_Wrist": "left_rubber_hand_link",
-        "R_Wrist": "right_rubber_hand_link",
-        "L_Thumb3": "left_thumb_link",
-        "L_Pinky3": "left_pinky_link",
-    },
     # Wuji dexterous hands (both) grafted onto the G1 in g1_29dof_wuji.xml.
     # Wrists map to the wuji palms (rubber mittens removed); 10 fingertips map
     # to the wuji distal links. Use with --data_format smplh_wuji.
@@ -276,19 +255,6 @@ JOINTS_MAPPINGS = {
         "R_Middle3": "wjr_right_finger3_link4",
         "R_Ring3": "wjr_right_finger4_link4",
         "R_Pinky3": "wjr_right_finger5_link4",
-    },
-    # Upper-body-only: interaction mesh spans ONLY a pelvis anchor + arms/wrists
-    # (no hip/knee/ankle/toe), so the Laplacian has zero lower-body vertices.
-    # Pair with --retargeter.q-a-init-idx 15 (freeze base+legs+waist) and
-    # --retargeter.no-activate-foot-sticking. (issue #102 upper-body recipe)
-    ("smplh_upper", "g1"): {
-        "Pelvis": "pelvis_contour_link",
-        "L_Shoulder": "left_shoulder_roll_link",
-        "R_Shoulder": "right_shoulder_roll_link",
-        "L_Elbow": "left_elbow_link",
-        "R_Elbow": "right_elbow_link",
-        "L_Wrist": "left_rubber_hand_link",
-        "R_Wrist": "right_rubber_hand_link",
     },
     # Wuji welded-finger model (Phase 1 decoupling): FULL body (legs for
     # walking) + wrists -> wuji palms. No fingertip targets — fingers are
