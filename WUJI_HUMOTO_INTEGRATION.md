@@ -105,12 +105,56 @@ python examples/robot_retarget.py --data-format smplh_wuji \
 | `render_g1_mp4.py` | MP4 render of a retargeted G1 + object |
 | `models/g1/g1_29dof_w_<object>.xml` | 26 per-object G1 models (hammer, knife, spatula, guitar, floor_lamp, …) |
 
-**Run**:
+### End-to-end: reproduce a HUMOTO sequence (verified)
+
+Raw Mixamo FBX → up_bone pkl → direct `.pt` → retargeted G1 npz → mp4. Three conda
+envs, one per repo. Example: sequence `checking_organizer_medium_on_table-289`,
+object `organizer_medium`. The direct `.pt` drops Mixamo joint *positions* into the
+52 SMPLH slots (no SMPL-X fit); OmniRetarget reads only those + the object pose.
+
 ```bash
-cd src/holosoma_retargeting/holosoma_retargeting
-python viser_g1.py     <task_name> <object_name> [save_dir] [--port 8080]
-python render_g1_mp4.py <task_name> <object_name> [save_dir] [out_dir]
-# e.g. python viser_g1.py sub14_suitcase_001 suitcase demo_results/g1/object_interaction/omomo_test
+SEQ=checking_organizer_medium_on_table-289 ; OBJ=organizer_medium
+
+# ── STEP 0 — raw FBX → up_bone pkl   (humoto repo · env `humoto`: python 3.10, bpy==4.0.0 — see humoto/README)
+conda activate humoto
+cd ~/Downloads/humoto/scripts
+RAW=~/Downloads/humoto/humoto/humoto_0805                       # full-release sequences
+python clear_human_scale.py    -d $RAW/$SEQ          -o /tmp/h_scale
+python transfer_human_model.py -d /tmp/h_scale/$SEQ  -m ../human_model/human_model_without_texture_up_bone.fbx -o /tmp/h_upbone
+python extract_pk_data.py      -d /tmp/h_upbone/$SEQ -o ~/Downloads/humoto_data/humoto_upbone_pkl
+#   -> humoto_data/humoto_upbone_pkl/$SEQ/$SEQ.pkl   (no -m: objects load from humoto_objects_0805)
+
+# ── STEP 1 — up_bone pkl → direct .pt   (InterAct repo · env `interact`: torch, smplx, trimesh, scipy, tqdm)
+conda activate interact
+cd ~/Downloads/InterAct/simulation
+export HUMOTO_UPBONE=~/Downloads/humoto_data/humoto_upbone_pkl
+export HUMOTO_REPO=~/Downloads/humoto                                # provides human_model
+export HUMOTO_OBJECTS=~/Downloads/humoto/humoto/humoto_objects_0805  # object mesh for floor-norm
+python humoto_direct_to_pt.py $SEQ $OBJ
+#   -> InterAct/result/humoto_pt/$SEQ.pt   (T, 591)
+
+# ── STEP 2 — .pt → retargeted G1 npz   (holosoma repo · env `omniretarget`)
+conda activate omniretarget
+cd ~/Downloads/holosoma/src/holosoma_retargeting/holosoma_retargeting
+mkdir -p models/$OBJ                                                 # mount object mesh: gitignored symlink, not committed
+ln -sf ~/Downloads/humoto/humoto/humoto_objects_0805/$OBJ/$OBJ.obj  models/$OBJ/$OBJ.obj
+python examples/robot_retarget.py \
+  --task-type object_interaction --data-format smplh \
+  --task-name $SEQ --data-path ~/Downloads/InterAct/result/humoto_pt \
+  --task-config.object-name $OBJ \
+  --robot-config.robot-urdf-file models/g1/g1_29dof.urdf \
+  --save-dir demo_results/g1/object_interaction/humoto
+#   -> demo_results/g1/object_interaction/humoto/${SEQ}_original.npz   (T, 43)
+#   (robot-urdf-file only NAMES the scene xml: g1_29dof.urdf -> g1_29dof_w_$OBJ.xml)
+
+# ── STEP 3 — render mp4   (omniretarget env)
+python render_g1_mp4.py $SEQ $OBJ demo_results/g1/object_interaction/humoto
+```
+
+**Quick view** of an existing result (interactive viser / mp4):
+```bash
+python viser_g1.py      $SEQ $OBJ demo_results/g1/object_interaction/humoto [--port 8080]
+python render_g1_mp4.py $SEQ $OBJ demo_results/g1/object_interaction/humoto [out_dir]
 ```
 
 ---
@@ -122,8 +166,11 @@ git — fetch them from the datasets and drop them in place:
 
 - **Object meshes** — the per-object models `models/g1/g1_29dof_w_<obj>.xml`
   reference `models/<obj>/<obj>.obj` (e.g. `models/hammer/hammer.obj`). Only
-  `models/largebox/` ships in-repo; the other ~26 object folders come from the
-  **HUMOTO / InterAct** dataset. Place them under `models/<obj>/`.
+  `models/largebox/largebox.obj` ships in-repo; every other `models/*/*.obj` is
+  **gitignored** and mounted as a symlink into the HUMOTO dataset — never committed:
+  ```bash
+  ln -s ~/Downloads/humoto/humoto/humoto_objects_0805/<obj>/<obj>.obj  models/<obj>/<obj>.obj
+  ```
 - **`wuji-hand-description`** — only to regenerate the Wuji models (Step 0).
 - **`wuji-retargeting`** ([wuji-technology/wuji-retargeting](https://github.com/wuji-technology/wuji-retargeting)) —
   the external finger optimizer used by Step 3 (`phase2_dex.py`). Needs its own
