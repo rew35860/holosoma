@@ -16,7 +16,7 @@ import mujoco
 import trimesh
 import viser
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent  # scripts live in wuji/, repo root is one up
 NPZ = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "demo_results_wuji/sub3_largebox_003.npz"
 PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 8082
 MODEL_ARG = sys.argv[3] if len(sys.argv) > 3 else None  # optional explicit model xml

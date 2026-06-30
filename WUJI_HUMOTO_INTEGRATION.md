@@ -20,12 +20,12 @@ motion onto it, on top of OmniRetarget's body/object solve.
 **New / changed files**
 | File | Purpose |
 |---|---|
-| `make_wuji_model.py` | Generate the G1+Wuji MJCF via `MjSpec.attach` (optional finger **weld** + object **baking**) → `models/g1/g1_29dof_wuji[_welded][_w_<obj>].xml` |
-| `config_types/data_type.py` | New data formats: `smplh_wuji`, `smplh_wuji_body`, `smplh_dex`, `smplh_upper` (10 fingertips → Wuji finger links) |
+| `wuji/make_wuji_model.py` | Generate the G1+Wuji MJCF via `MjSpec.attach` (optional finger **weld** + object **baking**) → `models/g1/g1_29dof_wuji[_welded][_w_<obj>].xml` |
+| `config_types/data_type.py` | New data formats: `smplh_wuji`, `smplh_wuji_body` (10 fingertips → Wuji finger links) |
 | `examples/robot_retarget.py` | Loader + object-interaction support for the new SMPLH-hand formats |
-| `merge_wuji.py` | Splice a welded-body solve + a finger solve into one full-DOF qpos |
-| `play_wuji.py`, `play_model.py`, `play_fingers.py` | Viser playback (MuJoCo FK, no URDF) |
-| `render_mp4.py` | Offscreen MuJoCo render of a qpos trajectory (`--ghost`, `--track`) |
+| `wuji/merge_wuji.py` | Splice a welded-body solve + a finger solve into one full-DOF qpos (holosoma-only finger variant) |
+| `wuji/play_wuji.py` | Viser playback of a result (MuJoCo FK, no URDF) |
+| `wuji/render_mp4.py` | Offscreen MuJoCo render of a qpos trajectory (`--ghost`, `--track`) |
 | `models/g1/g1_29dof_wuji*.xml` + `models/g1/assets/*.STL` | Built Wuji-hand models + meshes (committed, ready to run) |
 
 ### End-to-end: reproduce the Wuji dexterous grasp (verified, fully reproducible)
@@ -44,9 +44,8 @@ and a conda env with `pinocchio` for the finger step (see `wuji-retargeting`'s R
 conda activate omniretarget
 cd src/holosoma_retargeting/holosoma_retargeting
 export WUJI_HAND_DESCRIPTION=~/Downloads/wuji-hand-description   # default: ~/wuji-hand-description
-python make_wuji_model.py                 # -> models/g1/g1_29dof_wuji.xml                   (nq 76)
-python make_wuji_model.py largebox        # -> models/g1/g1_29dof_wuji_w_largebox.xml        (nq 83)
-python make_wuji_model.py largebox --weld # -> models/g1/g1_29dof_wuji_welded_w_largebox.xml (nq 43)
+python wuji/make_wuji_model.py largebox        # -> models/g1/g1_29dof_wuji_w_largebox.xml        (nq 83, render model)
+python wuji/make_wuji_model.py largebox --weld # -> models/g1/g1_29dof_wuji_welded_w_largebox.xml (nq 43, Step 1 model)
 #   (the models are committed and work as-is; run Step 0 only to regenerate them.
 #    The "Attach conflict" warnings are harmless — MuJoCo just keeps the G1's sim settings.)
 
@@ -75,8 +74,8 @@ python phase2_dex.py
 # ── STEP 4 — render the mp4  (omniretarget env)
 conda activate omniretarget
 cd ~/Downloads/holosoma/src/holosoma_retargeting/holosoma_retargeting
-python render_mp4.py demo_results_wuji_dex/sub3_largebox_003.npz out_dex.mp4 --ghost
-python play_wuji.py  demo_results_wuji_dex/sub3_largebox_003.npz 8082   # or view interactively
+python wuji/render_mp4.py demo_results_wuji_dex/sub3_largebox_003.npz out_dex.mp4 --ghost
+python wuji/play_wuji.py  demo_results_wuji_dex/sub3_largebox_003.npz 8082   # or view interactively
 ```
 
 > The built `models/g1/g1_29dof_wuji*.xml` work out-of-the-box; the

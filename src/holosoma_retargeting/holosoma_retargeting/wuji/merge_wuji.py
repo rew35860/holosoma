@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent  # scripts live in wuji/, repo root is one up
 G1 = REPO / "models/g1"
 M_out = mujoco.MjModel.from_xml_path(str(G1 / "g1_29dof_wuji_w_largebox.xml"))   # 83 dof target
 M_body = mujoco.MjModel.from_xml_path(str(G1 / "g1_29dof_wuji_welded_w_largebox.xml"))  # 43

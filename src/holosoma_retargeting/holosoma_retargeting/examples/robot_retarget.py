@@ -153,7 +153,7 @@ def validate_config(cfg: RetargetingConfig) -> None:
     if cfg.task_type == "climbing" and cfg.data_format not in (None, "mocap"):
         raise ValueError("Climbing task requires 'mocap' data format")
     if cfg.task_type == "object_interaction" and cfg.data_format not in (
-        None, "smplh", "smplh_dex", "smplh_wuji", "smplh_wuji_body",
+        None, "smplh", "smplh_wuji", "smplh_wuji_body",
     ):
         raise ValueError("Object interaction requires 'smplh' data format")
     # robot_only accepts any format in the registry (already validated above)
@@ -217,7 +217,7 @@ def load_motion_data(
             # LAFAN-specific spine adjustment
             human_joints[:, spine_joint_idx, -1] -= 0.06
             smpl_scale = motion_data_config.default_scale_factor or 1.0
-        elif data_format in ("smplh", "smplh_dex", "smplh_wuji", "smplh_upper", "smplh_wuji_body"):  # smplh variants
+        elif data_format in ("smplh", "smplh_wuji", "smplh_wuji_body"):  # smplh variants
             pt_path = data_path / f"{task_name}.pt"
             if not pt_path.exists():
                 raise FileNotFoundError(f"InterMimic data file not found: {pt_path}")

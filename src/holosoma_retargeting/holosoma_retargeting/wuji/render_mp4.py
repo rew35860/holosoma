@@ -13,7 +13,7 @@ import numpy as np
 import mujoco
 import imageio
 
-HOLO = os.path.dirname(os.path.abspath(__file__))
+HOLO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # wuji/ -> repo root
 G1 = HOLO + "/models/g1"
 
 npz = sys.argv[1]

@@ -23,7 +23,7 @@ import mujoco
 
 warnings.filterwarnings("ignore")
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent  # scripts live in wuji/, repo root is one up
 G1DIR = REPO / "models/g1"
 ASSETS = str(G1DIR / "assets") + "/"
 # External dep, only needed to (re)generate the models -- the built

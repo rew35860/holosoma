@@ -351,9 +351,7 @@ JOINTS_MAPPINGS = {
 TOE_NAMES_BY_FORMAT = {
     "lafan": ["LeftToeBase", "RightToeBase"],
     "smplh": ["L_Toe", "R_Toe"],
-    "smplh_dex": ["L_Toe", "R_Toe"],
     "smplh_wuji": ["L_Toe", "R_Toe"],
-    "smplh_upper": ["L_Toe", "R_Toe"],
     "smplh_wuji_body": ["L_Toe", "R_Toe"],
     "mocap": ["LeftToeBase", "RightToeBase"],
     "smplx": ["L_Foot", "R_Foot"],
@@ -381,9 +379,7 @@ DATA_FORMAT_CONSTANTS: dict[str, FormatConstants] = {
 DEMO_JOINTS_REGISTRY: dict[str, list[str]] = {
     "lafan": LAFAN_DEMO_JOINTS,
     "smplh": SMPLH_DEMO_JOINTS,
-    "smplh_dex": SMPLH_DEMO_JOINTS,  # dexterous variant — same joints, finger mapping differs
     "smplh_wuji": SMPLH_DEMO_JOINTS,  # Wuji-hands variant — same joints, maps 10 fingertips
-    "smplh_upper": SMPLH_DEMO_JOINTS,  # upper-body-only — mapping drops lower body
     "smplh_wuji_body": SMPLH_DEMO_JOINTS,  # wuji welded-finger full-body
     "mocap": MOCAP_DEMO_JOINTS,
     "smplx": SMPLX_DEMO_JOINTS,
