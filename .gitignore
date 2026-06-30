@@ -45,3 +45,9 @@ demo_results_*/
 MUJOCO_LOG.TXT
 *.mp4
 *_sample.png
+
+# Object meshes are mounted from the HUMOTO/InterAct dataset, NOT committed
+# (e.g. symlink models/<obj>/<obj>.obj -> .../humoto_objects_0805/<obj>/<obj>.obj).
+# Robot meshes live 2 levels deep (models/<robot>/assets|meshes/) so are unaffected.
+src/holosoma_retargeting/holosoma_retargeting/models/*/*.obj
+!src/holosoma_retargeting/holosoma_retargeting/models/largebox/largebox.obj
