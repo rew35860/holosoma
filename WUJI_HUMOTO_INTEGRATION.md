@@ -28,67 +28,65 @@ motion onto it, on top of OmniRetarget's body/object solve.
 | `wuji/render_mp4.py` | Offscreen MuJoCo render of a qpos trajectory (`--ghost`, `--track`) |
 | `models/g1/g1_29dof_wuji*.xml` + `models/g1/assets/*.STL` | Built Wuji-hand models + meshes (committed, ready to run) |
 
-### End-to-end: reproduce the Wuji dexterous grasp (verified, fully reproducible)
+### End-to-end: reproduce the Wuji dexterous grasp (verified)
 
-Produces the dexterous-grasp result for `sub3_largebox_003` and renders an mp4.
-The body+box solve is done in holosoma (`omniretarget` env); the *finger*
-optimization is done by the external [`wuji-retargeting`](https://github.com/wuji-technology/wuji-retargeting)
-tool (`phase2_dex.py`, run in its own `pinocchio` env — here called `wujiret`).
-The retargeter is deterministic (`np.random.seed(0)`), so re-runs are bit-identical.
+`sub3_largebox_003` → dexterous-grasp npz + mp4. Body+box solve in holosoma
+(`omniretarget`); fingers via the external
+[`wuji-retargeting`](https://github.com/wuji-technology/wuji-retargeting) `phase2_dex.py`
+(its own `pinocchio` env, here `wujiret`). Deterministic (`np.random.seed(0)`) → bit-identical.
 
-**Prerequisites:** the external `wuji-hand-description` + `wuji-retargeting` repos,
-and a conda env with `pinocchio` for the finger step (see `wuji-retargeting`'s README).
+**Prereqs:** the `wuji-hand-description` + `wuji-retargeting` repos. Steps run in one
+shell; `conda activate` / `cd` shown only when the env or dir changes.
 
+**Step 0 — build the Wuji models.** Already committed; run only to regenerate.
 ```bash
-# ── STEP 0 — build the Wuji models  (omniretarget env; needs wuji-hand-description)
 conda activate omniretarget
 cd src/holosoma_retargeting/holosoma_retargeting
 export WUJI_HAND_DESCRIPTION=~/Downloads/wuji-hand-description   # default: ~/wuji-hand-description
-python wuji/make_wuji_model.py largebox        # -> models/g1/g1_29dof_wuji_w_largebox.xml        (nq 83, render model)
-python wuji/make_wuji_model.py largebox --weld # -> models/g1/g1_29dof_wuji_welded_w_largebox.xml (nq 43, Step 1 model)
-#   (the models are committed and work as-is; run Step 0 only to regenerate them.
-#    The "Attach conflict" warnings are harmless — MuJoCo just keeps the G1's sim settings.)
+python wuji/make_wuji_model.py largebox         # g1_29dof_wuji_w_largebox.xml         (nq 83, render)
+python wuji/make_wuji_model.py largebox --weld  # g1_29dof_wuji_welded_w_largebox.xml  (nq 43, Step 1)
+```
 
-# ── STEP 1 — welded body retarget  -> demo_results_wuji_welded  (43-DOF: body + box)
-#    The robot-urdf-file name only selects the MuJoCo xml (…_w_largebox.xml); the .urdf
-#    itself is never loaded headless.  Welded model has no finger DOF -> smplh_wuji_body.
+**Step 1 — welded body retarget** → 43-DOF (body + box).
+```bash
 python examples/robot_retarget.py --data-format smplh_wuji_body \
     --robot-config.robot-urdf-file models/g1/g1_29dof_wuji_welded.urdf \
     --save-dir demo_results_wuji_welded
-#   -> demo_results_wuji_welded/sub3_largebox_003_original.npz   (196, 43)
+# -> demo_results_wuji_welded/sub3_largebox_003_original.npz   (196, 43)
+```
 
-# ── STEP 2 — provide human_joints for phase2_dex (it computes the fingers itself and only
-#    needs the human keypoints, which the welded run already saved). Just a copy:
+**Step 2 — stage human joints for `phase2_dex`** (a copy; it recomputes fingers itself).
+```bash
 mkdir -p demo_results_wuji
-cp demo_results_wuji_welded/sub3_largebox_003_original.npz \
-   demo_results_wuji/sub3_largebox_003.npz
+cp demo_results_wuji_welded/sub3_largebox_003_original.npz demo_results_wuji/sub3_largebox_003.npz
+```
 
-# ── STEP 3 — dex fingers + merge -> demo_results_wuji_dex   (external wuji-retargeting, pinocchio env)
+**Step 3 — dex fingers + merge** → 83-DOF.
+```bash
 conda activate wujiret
 cd ~/Downloads/wuji-retargeting
 python phase2_dex.py
-#   -> …/holosoma/…/demo_results_wuji_dex/sub3_largebox_003.npz   (196, 83)
-#   NB: phase2_dex.py has the holosoma path hardcoded (HOLO=...) and reads the fixed dir
-#       names demo_results_wuji_welded/ and demo_results_wuji/ — edit those if you relocate.
+# -> holosoma/.../demo_results_wuji_dex/sub3_largebox_003.npz   (196, 83)
+```
 
-# ── STEP 4 — render the mp4  (omniretarget env)
+**Step 4 — render / view.**
+```bash
 conda activate omniretarget
 cd ~/Downloads/holosoma/src/holosoma_retargeting/holosoma_retargeting
 python wuji/render_mp4.py demo_results_wuji_dex/sub3_largebox_003.npz out_dex.mp4 --ghost
-python wuji/play_wuji.py  demo_results_wuji_dex/sub3_largebox_003.npz 8082   # or view interactively
+python wuji/play_wuji.py  demo_results_wuji_dex/sub3_largebox_003.npz 8082   # interactive
 ```
 
-> The built `models/g1/g1_29dof_wuji*.xml` work out-of-the-box; the
-> `wuji-hand-description` repo is only needed to *regenerate* them (Step 0).
+Notes:
+- `--robot-urdf-file` only *names* the scene xml (`…_w_largebox.xml`); the `.urdf` is never loaded headless.
+- `phase2_dex.py` hardcodes the holosoma path + the `demo_results_wuji_welded/` / `demo_results_wuji/` names — edit if you relocate.
+- Step 0's "Attach conflict" warnings are harmless (MuJoCo keeps the G1's sim settings).
 
-**Holosoma-only variant (no external tool, lower-quality fingers):** the in-repo
-`smplh_wuji` all-in-one path retargets body + fingers + box in one solve — but the
-finger geoms vs. the box make it fragile (the fingers can penetrate). Use it only
-if you can't run the external dex step:
+**Holosoma-only variant** — no external tool; fingers can penetrate the box, so use only if you can't run Step 3:
 ```bash
 python examples/robot_retarget.py --data-format smplh_wuji \
     --robot-config.robot-urdf-file models/g1/g1_29dof_wuji.urdf \
-    --save-dir demo_results_wuji_obj            # -> 83-DOF, all-in-one
+    --save-dir demo_results_wuji_obj            # 83-DOF, all-in-one
 ```
 
 ---
@@ -98,8 +96,9 @@ python examples/robot_retarget.py --data-format smplh_wuji \
 **New / changed files**
 | File | Purpose |
 |---|---|
-| `src/interaction_mesh_retargeter.py` (+164) | HUMOTO retargeting logic |
-| `src/utils.py` (+30) | helper additions |
+| `src/interaction_mesh_retargeter.py` | HUMOTO retargeting logic (interaction-mesh QP solve) |
+| `src/diagnostics.py` | solver-failure diagnostics (`diagnose_infeasibility`) — split out of the retargeter so it only runs on a failed CVXPY solve |
+| `src/utils.py` | helper additions |
 | `demo_data/height_dict.pkl` | per-subject heights (used for the human→robot scale) |
 | `viser_g1.py` | interactive viser viewer for a retargeted G1 + object |
 | `render_g1_mp4.py` | MP4 render of a retargeted G1 + object |
@@ -107,36 +106,41 @@ python examples/robot_retarget.py --data-format smplh_wuji \
 
 ### End-to-end: reproduce a HUMOTO sequence (verified)
 
-Raw Mixamo FBX → up_bone pkl → direct `.pt` → retargeted G1 npz → mp4. Three conda
-envs, one per repo. Example: sequence `checking_organizer_medium_on_table-289`,
-object `organizer_medium`. The direct `.pt` drops Mixamo joint *positions* into the
-52 SMPLH slots (no SMPL-X fit); OmniRetarget reads only those + the object pose.
-
+Raw Mixamo FBX → up_bone pkl → direct `.pt` → G1 npz → mp4, across three envs.
+Example `checking_organizer_medium_on_table-289` / `organizer_medium`. The direct
+`.pt` drops Mixamo joint positions into the 52 SMPLH slots (no SMPL-X fit);
+OmniRetarget reads only those + the object pose. Set once:
 ```bash
 SEQ=checking_organizer_medium_on_table-289 ; OBJ=organizer_medium
+```
 
-# ── STEP 0 — raw FBX → up_bone pkl   (humoto repo · env `humoto`: python 3.10, bpy==4.0.0 — see humoto/README)
+**Step 0 — raw FBX → up_bone pkl.** Env `humoto` (python 3.10, bpy==4.0.0; see humoto/README).
+```bash
 conda activate humoto
 cd ~/Downloads/humoto/scripts
-RAW=~/Downloads/humoto/humoto/humoto_0805                       # full-release sequences
+RAW=~/Downloads/humoto/humoto/humoto_0805
 python clear_human_scale.py    -d $RAW/$SEQ          -o /tmp/h_scale
 python transfer_human_model.py -d /tmp/h_scale/$SEQ  -m ../human_model/human_model_without_texture_up_bone.fbx -o /tmp/h_upbone
 python extract_pk_data.py      -d /tmp/h_upbone/$SEQ -o ~/Downloads/humoto_data/humoto_upbone_pkl
-#   -> humoto_data/humoto_upbone_pkl/$SEQ/$SEQ.pkl   (no -m: objects load from humoto_objects_0805)
+# -> humoto_upbone_pkl/$SEQ/$SEQ.pkl   (no -m: objects come from humoto_objects_0805)
+```
 
-# ── STEP 1 — up_bone pkl → direct .pt   (InterAct repo · env `interact`: torch, smplx, trimesh, scipy, tqdm)
+**Step 1 — up_bone pkl → direct .pt.** Env `interact` (torch, smplx, trimesh, scipy, tqdm).
+```bash
 conda activate interact
 cd ~/Downloads/InterAct/simulation
 export HUMOTO_UPBONE=~/Downloads/humoto_data/humoto_upbone_pkl
-export HUMOTO_REPO=~/Downloads/humoto                                # provides human_model
-export HUMOTO_OBJECTS=~/Downloads/humoto/humoto/humoto_objects_0805  # object mesh for floor-norm
+export HUMOTO_REPO=~/Downloads/humoto
+export HUMOTO_OBJECTS=~/Downloads/humoto/humoto/humoto_objects_0805
 python humoto_direct_to_pt.py $SEQ $OBJ
-#   -> InterAct/result/humoto_pt/$SEQ.pt   (T, 591)
+# -> InterAct/result/humoto_pt/$SEQ.pt   (T, 591)
+```
 
-# ── STEP 2 — .pt → retargeted G1 npz   (holosoma repo · env `omniretarget`)
+**Step 2 — .pt → retargeted G1 npz.** Env `omniretarget`.
+```bash
 conda activate omniretarget
 cd ~/Downloads/holosoma/src/holosoma_retargeting/holosoma_retargeting
-mkdir -p models/$OBJ                                                 # mount object mesh: gitignored symlink, not committed
+mkdir -p models/$OBJ                                                 # mount object mesh (gitignored symlink)
 ln -sf ~/Downloads/humoto/humoto/humoto_objects_0805/$OBJ/$OBJ.obj  models/$OBJ/$OBJ.obj
 python examples/robot_retarget.py \
   --task-type object_interaction --data-format smplh \
@@ -144,17 +148,14 @@ python examples/robot_retarget.py \
   --task-config.object-name $OBJ \
   --robot-config.robot-urdf-file models/g1/g1_29dof.urdf \
   --save-dir demo_results/g1/object_interaction/humoto
-#   -> demo_results/g1/object_interaction/humoto/${SEQ}_original.npz   (T, 43)
-#   (robot-urdf-file only NAMES the scene xml: g1_29dof.urdf -> g1_29dof_w_$OBJ.xml)
-
-# ── STEP 3 — render mp4   (omniretarget env)
-python render_g1_mp4.py $SEQ $OBJ demo_results/g1/object_interaction/humoto
+# -> .../object_interaction/humoto/${SEQ}_original.npz   (T, 43)
+#    (--robot-urdf-file only NAMES the scene xml: g1_29dof.urdf -> g1_29dof_w_$OBJ.xml)
 ```
 
-**Quick view** of an existing result (interactive viser / mp4):
+**Step 3 — render / view.**
 ```bash
+python render_g1_mp4.py $SEQ $OBJ demo_results/g1/object_interaction/humoto
 python viser_g1.py      $SEQ $OBJ demo_results/g1/object_interaction/humoto [--port 8080]
-python render_g1_mp4.py $SEQ $OBJ demo_results/g1/object_interaction/humoto [out_dir]
 ```
 
 ---
