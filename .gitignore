@@ -42,6 +42,7 @@ wandb-metadata.json
 # Matches demo_results_wuji*/, demo_results_fingers/, demo_results_upper/, etc.,
 # but NOT the upstream demo_results/ folder.
 demo_results_*/
+renders/
 MUJOCO_LOG.TXT
 *.mp4
 *_sample.png

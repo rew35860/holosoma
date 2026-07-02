@@ -17,7 +17,8 @@ HOLO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # wuji/ -> r
 G1 = HOLO + "/models/g1"
 
 npz = sys.argv[1]
-out = sys.argv[2]
+out = sys.argv[2]                       # may include a folder; created if missing
+os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
 track = "--track" in sys.argv
 pos = [a for a in sys.argv[3:] if not a.startswith("-")]
 q = np.load(npz, allow_pickle=True)["qpos"]
@@ -27,26 +28,28 @@ W, H = 1024, 768
 _spec = mujoco.MjSpec.from_file(xml)
 _spec.visual.global_.offwidth = W      # default offscreen buffer is 640x480
 _spec.visual.global_.offheight = H
-if "--ghost" in sys.argv:              # translucent box -> buried fingers visible
+# object name parsed from the scene xml (…_w_<obj>.xml) — used for --ghost only
+obj_name = os.path.basename(xml).split("_w_")[-1].rsplit(".xml", 1)[0] if "_w_" in xml else ""
+if "--ghost" in sys.argv and obj_name:  # translucent object -> buried fingers visible
     for gm in _spec.geoms:
-        if gm.parent is not None and "largebox" in (gm.parent.name or ""):
+        if gm.parent is not None and obj_name in (gm.parent.name or ""):
             gm.rgba = [0.85, 0.55, 0.35, 0.4]
 m = _spec.compile()
 d = mujoco.MjData(m)
 assert q.shape[1] == m.nq, f"qpos width {q.shape[1]} != model nq {m.nq}"
 r = mujoco.Renderer(m, H, W)
 cam = mujoco.MjvCamera()
-box_b = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "largebox_link")
 
-# precompute box path for camera target
-boxpos = []
+# Auto-frame the whole scene (robot + object) — no hardcoded object name, so this
+# works for any object. lookat = per-frame scene centroid; distance fits the spread.
+centers = np.empty((q.shape[0], 3))
 for t in range(q.shape[0]):
     d.qpos[:] = q[t]
     mujoco.mj_forward(m, d)
-    boxpos.append(d.xpos[box_b].copy() if box_b >= 0 else d.xpos[1].copy())
-boxpos = np.array(boxpos)
-cam.lookat[:] = boxpos.mean(0)
-cam.distance = 0.7 if track else 1.6
+    centers[t] = d.xpos[1:].mean(0)    # mean of all non-world bodies
+span = float(np.linalg.norm(centers.max(0) - centers.min(0)))
+cam.lookat[:] = centers.mean(0)
+cam.distance = 2.0 if track else max(2.4, span * 1.3)   # was 0.7/1.6 — too tight
 cam.azimuth = 135
 cam.elevation = -18
 
@@ -55,10 +58,15 @@ for t in range(q.shape[0]):
     d.qpos[:] = q[t]
     mujoco.mj_forward(m, d)
     if track:
-        cam.lookat[:] = boxpos[t]
+        cam.lookat[:] = centers[t]     # follow the scene centroid
     r.update_scene(d, cam)
     frames.append(r.render())
 
 imageio.imwrite(out.rsplit(".", 1)[0] + "_sample.png", frames[len(frames) // 2])
 imageio.mimsave(out, frames, fps=30, quality=8, macro_block_size=1)
 print(f"[render] {len(frames)} frames -> {out}  (sample png alongside)")
+
+# The mp4 is written; EGL/GL context teardown on normal exit spams harmless
+# "EGLError" tracebacks, so exit hard to skip those destructors.
+sys.stdout.flush()
+os._exit(0)
