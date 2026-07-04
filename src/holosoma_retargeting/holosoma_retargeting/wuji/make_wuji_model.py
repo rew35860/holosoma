@@ -12,7 +12,8 @@ Usage:
   python make_wuji_model.py largebox         # -> models/g1/g1_29dof_wuji_w_largebox.xml
   python make_wuji_model.py smallbox         # -> ..._w_smallbox.xml  (any object with a mesh)
 
-Tunables: QUAT (hand orientation on the wrist), PX (palm forward offset).
+Hand mount is derived from real hardware (Unitree G1 inspire-hand URDF flange +
+the Wuji Direct-Adapter drawing), not eyeballed -- see the mount constants below.
 """
 import os
 import sys
@@ -32,11 +33,28 @@ ASSETS = str(G1DIR / "assets") + "/"
 # $WUJI_HAND_DESCRIPTION at it (default: ~/wuji-hand-description).
 WUJI = Path(os.environ.get("WUJI_HAND_DESCRIPTION", Path.home() / "wuji-hand-description"))
 
-QUAT = [0.7071068, 0.0, 0.7071068, 0.0]   # fingers forward, palm down, thumb medial
-PX = 0.035                                 # palm forward offset from wrist
+# ── Real-hardware mount (replaces the old eyeballed QUAT/PX) ──────────────────────
+# Sources: (1) Unitree G1 inspire-hand URDF -- the flange frame Unitree bolts ANY hand
+# to on wrist_yaw_link; (2) the Wuji "Direct-Adapter assembled" drawing + docking STL --
+# the adapter puck between the flange and the palm.
+#   FLANGE_X  0.0415  = Unitree official flange offset (our old 0.035 was 6.5mm short).
+#   ADAPTER_STANDOFF 0.026 = Direct-Adapter net standoff (drawing "26+-0.1"); the old
+#                            model OMITTED the adapter, so the hand sat ~3cm too close.
+# MOUNT_X is the palm mounting-face distance from the wrist along the arm's forward (+x) axis.
+# Rotation: the wuji palm's +z (fingers) must point along +x (forward); QUAT does that, and
+# left/right are MIRRORED (Unitree uses different rpy per side). The CLOCKING (thumb direction
+# about the mount axis) is the one thing a 2D drawing can't pin -- certify it by rendering the
+# built model against wuji-hand&Direct-Adapter-assembled-v1.pdf and adjust QUAT_* if twisted.
+FLANGE_X = 0.0415
+ADAPTER_STANDOFF = 0.026
+MOUNT_X = FLANGE_X + ADAPTER_STANDOFF
+# The wuji left.xml / right.xml are ALREADY mirror models, so the SAME mount quaternion
+# gives palm-down on both hands (Unitree's per-side rpy is for ONE inspire model mounted
+# mirrored -- copying it here double-flips the left hand, palm-up). Same quat for both.
+QUAT_R = QUAT_L = [0.7071068, 0.0, 0.7071068, 0.0]   # palm +z (fingers) -> arm +x, palm down
 
 
-def make(obj_name=None, px=PX, weld=False):
+def make(obj_name=None, px=MOUNT_X, weld=False):
     if not (WUJI / "mjcf/left.xml").is_file():
         sys.exit(f"Wuji hand description not found at {WUJI}. Clone wuji-hand-description and set "
                  f"$WUJI_HAND_DESCRIPTION. (The pre-built models in {G1DIR} already work without it.)")
@@ -47,8 +65,8 @@ def make(obj_name=None, px=PX, weld=False):
         s.meshdir = ASSETS
     g1.delete(g1.body("left_rubber_hand_link"))
     g1.delete(g1.body("right_rubber_hand_link"))
-    fl = g1.body("left_wrist_yaw_link").add_frame();  fl.pos = [px, 0, 0]; fl.quat = QUAT
-    fr = g1.body("right_wrist_yaw_link").add_frame(); fr.pos = [px, 0, 0]; fr.quat = QUAT
+    fl = g1.body("left_wrist_yaw_link").add_frame();  fl.pos = [px, 0, 0]; fl.quat = QUAT_L
+    fr = g1.body("right_wrist_yaw_link").add_frame(); fr.pos = [px, 0, 0]; fr.quat = QUAT_R
     g1.attach(wl, prefix="wj_", frame=fl)
     g1.attach(wr, prefix="wjr_", frame=fr)
 
@@ -100,4 +118,4 @@ if __name__ == "__main__":
     weld = "--weld" in sys.argv
     pos = [a for a in sys.argv[1:] if not a.startswith("-")]
     arg = pos[0] if pos and pos[0] not in ("none", "-") else None
-    make(arg, float(pos[1]) if len(pos) > 1 else PX, weld=weld)
+    make(arg, float(pos[1]) if len(pos) > 1 else MOUNT_X, weld=weld)
