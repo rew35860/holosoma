@@ -40,6 +40,10 @@
     <mesh name="right_rubber_hand_link" content_type="model/obj" file="right_rubber_hand.obj"/>
 
     <mesh name="smallbox_mesh" file="../../smallbox/smallbox.obj" scale="1 1 1"/>
+    <mesh name="smallbox_coacd_0_mesh" file="../../smallbox/coacd/smallbox_coacd_0.obj" scale="1 1 1"/>
+    <mesh name="smallbox_coacd_1_mesh" file="../../smallbox/coacd/smallbox_coacd_1.obj" scale="1 1 1"/>
+    <mesh name="smallbox_coacd_2_mesh" file="../../smallbox/coacd/smallbox_coacd_2.obj" scale="1 1 1"/>
+    <mesh name="smallbox_coacd_3_mesh" file="../../smallbox/coacd/smallbox_coacd_3.obj" scale="1 1 1"/>
   </asset>
 
   <worldbody>
@@ -359,13 +363,12 @@
     <body name="smallbox_link">
         <freejoint/>
         <inertial pos="0 0 0" mass="0.1" diaginertia="0.002 0.002 0.002"/>
-        <geom name="smallbox" type="mesh" mesh="smallbox_mesh"
-                contype="1" conaffinity="1"
-                pos="0 0 0" quat="1 0 0 0"
-                rgba="0.7 0.8 0.9 0.7"
-                friction="0.9 0.5 0.5"
-                solref="0.02 1"
-                solimp="0.9 0.95 0.001"/>
+        <geom name="smallbox" type="mesh" mesh="smallbox_mesh" contype="0" conaffinity="0"
+                group="2" rgba="0.7 0.8 0.9 0.7"/>
+        <geom name="smallbox_coacd_0" type="mesh" mesh="smallbox_coacd_0_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+        <geom name="smallbox_coacd_1" type="mesh" mesh="smallbox_coacd_1_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+        <geom name="smallbox_coacd_2" type="mesh" mesh="smallbox_coacd_2_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+        <geom name="smallbox_coacd_3" type="mesh" mesh="smallbox_coacd_3_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
     </body>
 
     <light name="sun" pos="0 0 5" dir="0 0 -1" directional="true"

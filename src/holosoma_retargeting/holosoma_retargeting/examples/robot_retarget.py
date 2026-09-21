@@ -153,9 +153,9 @@ def validate_config(cfg: RetargetingConfig) -> None:
     if cfg.task_type == "climbing" and cfg.data_format not in (None, "mocap"):
         raise ValueError("Climbing task requires 'mocap' data format")
     if cfg.task_type == "object_interaction" and cfg.data_format not in (
-        None, "smplh", "smplh_wuji", "smplh_wuji_body",
+        None, "smplh", "smplh_wuji", "smplh_wuji_body", "smplx", "smplx_hand",
     ):
-        raise ValueError("Object interaction requires 'smplh' data format")
+        raise ValueError("Object interaction requires an 'smplh' or 'smplx' data format")
     # robot_only accepts any format in the registry (already validated above)
 
 
@@ -256,12 +256,27 @@ def load_motion_data(
         object_poses = np.tile(np.array([[1, 0, 0, 0, 0, 0, 0]]), (num_frames, 1))
 
     elif task_type == "object_interaction":
-        pt_path = data_path / f"{task_name}.pt"
-        if not pt_path.exists():
-            raise FileNotFoundError(f"InterMimic data file not found: {pt_path}")
+        if data_format in ("smplx", "smplx_hand"):
+            # SMPL-X HOI input: the same npz contract robot_only already uses
+            # (global_joint_positions + height), plus the object trajectory that
+            # object_interaction needs. Height travels with the data rather than
+            # coming from demo_data/height_dict.pkl, because an SMPL-X source
+            # knows its own subject's stature from betas.
+            npz_file = data_path / f"{task_name}.npz"
+            if not npz_file.exists():
+                raise FileNotFoundError(f"SMPL-X HOI data file not found: {npz_file}")
 
-        human_joints, object_poses = load_intermimic_data(str(pt_path))
-        smpl_scale = calculate_scale_factor(task_name, constants.ROBOT_HEIGHT)
+            human_data = np.load(str(npz_file))
+            human_joints = human_data["global_joint_positions"]
+            object_poses = human_data["object_poses"]
+            smpl_scale = constants.ROBOT_HEIGHT / float(human_data["height"])
+        else:
+            pt_path = data_path / f"{task_name}.pt"
+            if not pt_path.exists():
+                raise FileNotFoundError(f"InterMimic data file not found: {pt_path}")
+
+            human_joints, object_poses = load_intermimic_data(str(pt_path))
+            smpl_scale = calculate_scale_factor(task_name, constants.ROBOT_HEIGHT)
 
     elif task_type == "climbing":
         task_dir = data_path / task_name

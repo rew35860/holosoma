@@ -311,6 +311,24 @@ JOINTS_MAPPINGS = {
         "L_Wrist": "left_rubber_hand_link",
         "R_Wrist": "right_rubber_hand_link",
     },
+
+    ("smplx_hand", "g1"): {
+        "Pelvis": "pelvis_contour_link",
+        "L_Hip": "left_hip_pitch_link",
+        "R_Hip": "right_hip_pitch_link",
+        "L_Knee": "left_knee_link",
+        "R_Knee": "right_knee_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Ankle": "left_ankle_intermediate_1_link",
+        "R_Ankle": "right_ankle_intermediate_1_link",
+        "L_Foot": "left_ankle_roll_sphere_5_link",
+        "R_Foot": "right_ankle_roll_sphere_5_link",
+        "L_Wrist": "left_rubber_hand_link",
+        "R_Wrist": "right_rubber_hand_link",
+    },
     ("mocap", "g1"): {
         "Spine1": "pelvis_contour_link",
         "LeftUpLeg": "left_hip_pitch_link",
@@ -355,6 +373,7 @@ TOE_NAMES_BY_FORMAT = {
     "smplh_wuji_body": ["L_Toe", "R_Toe"],
     "mocap": ["LeftToeBase", "RightToeBase"],
     "smplx": ["L_Foot", "R_Foot"],
+    "smplx_hand": ["L_Foot", "R_Foot"],
 }
 
 
@@ -376,6 +395,25 @@ DATA_FORMAT_CONSTANTS: dict[str, FormatConstants] = {
 # Unified registry: Maps format name to demo joints
 # This is the SINGLE PLACE to add new formats - just add an entry here!
 # No need to update any Literal types - DataFormat is now str with runtime validation
+# SMPL-X body joints plus the 30 MANO hand joints (SMPL-X model indices 25-39
+# and 40-54, same finger order as SMPL-H). OMOMO carries no finger articulation,
+# so these ride along frozen -- but a rigid fan of points bolted to each wrist
+# still encodes the wrist's ORIENTATION, which the 22-joint body-only list
+# throws away. Keeping them means an SMPL-X run has the same 52 keypoints as the
+# native SMPL-H run, so a comparison isolates the source model rather than
+# confounding it with keypoint density.
+_FINGERS = [
+    "Index1", "Index2", "Index3", "Middle1", "Middle2", "Middle3",
+    "Pinky1", "Pinky2", "Pinky3", "Ring1", "Ring2", "Ring3",
+    "Thumb1", "Thumb2", "Thumb3",
+]
+SMPLX_HAND_DEMO_JOINTS = (
+    SMPLX_DEMO_JOINTS
+    + [f"L_{f}" for f in _FINGERS]
+    + [f"R_{f}" for f in _FINGERS]
+)
+
+
 DEMO_JOINTS_REGISTRY: dict[str, list[str]] = {
     "lafan": LAFAN_DEMO_JOINTS,
     "smplh": SMPLH_DEMO_JOINTS,
@@ -383,6 +421,7 @@ DEMO_JOINTS_REGISTRY: dict[str, list[str]] = {
     "smplh_wuji_body": SMPLH_DEMO_JOINTS,  # wuji welded-finger full-body
     "mocap": MOCAP_DEMO_JOINTS,
     "smplx": SMPLX_DEMO_JOINTS,
+    "smplx_hand": SMPLX_HAND_DEMO_JOINTS,
 }
 
 # Type alias for data formats - use str to allow dynamic data formats via DEMO_JOINTS_REGISTRY
