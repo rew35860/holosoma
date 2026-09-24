@@ -52,3 +52,8 @@ MUJOCO_LOG.TXT
 # Robot meshes live 2 levels deep (models/<robot>/assets|meshes/) so are unaffected.
 src/holosoma_retargeting/holosoma_retargeting/models/*/*.obj
 !src/holosoma_retargeting/holosoma_retargeting/models/largebox/largebox.obj
+train_logs/
+
+# Local evaluation results and temporary model backups
+/eval_out/
+*.xml.bak
