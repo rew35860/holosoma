@@ -205,6 +205,38 @@ def weighted_surface_sampling_by_face_normal(mesh, sample_count, weight_func, se
     return np.array(sampled_points)
 
 
+# --- SOMA-style per-bone Mixamo->G1 scaling (env-gated A/B vs the uniform robot_height/human_height) ---
+# s = G1_bone / Mixamo_bone, measured by geometry_audit/per_joint_scale_table.py on the HUMOTO Mixamo
+# skeleton vs g1_29dof_wuji.xml rest pose. Each (child, parent, s): reconstruct child = scaled_parent +
+# s*(child - parent) so DIRECTIONS (the pose) are preserved and only bone LENGTHS change -- the same idea
+# as scale_hand_to_robot, applied to the body. Pelvis is the anchor; ratios >1 (pelvis width, forearm)
+# are exactly the segments the single uniform 0.819 gets wrong (the forearm underscale is a big part of
+# the wrist embodiment gap). Non-mapped slots (spine/fingers) are left untouched -- intended for the
+# smplh_wuji_body (fingers-welded) decoupled pipeline. Enable with WUJI_PERJOINT_SCALE=1.
+_PERJOINT_CHAINS = [
+    ("L_Hip", "Pelvis", 1.204), ("L_Knee", "L_Hip", 0.900), ("L_Ankle", "L_Knee", 0.723), ("L_Toe", "L_Ankle", 0.976),
+    ("R_Hip", "Pelvis", 1.204), ("R_Knee", "R_Hip", 0.900), ("R_Ankle", "R_Knee", 0.723), ("R_Toe", "R_Ankle", 0.976),
+    ("L_Shoulder", "Pelvis", 0.820), ("L_Elbow", "L_Shoulder", 0.758), ("L_Wrist", "L_Elbow", 1.183),
+    ("R_Shoulder", "Pelvis", 0.820), ("R_Elbow", "R_Shoulder", 0.758), ("R_Wrist", "R_Elbow", 1.183),
+]
+
+
+def per_joint_rescale(human_joints, demo_joints):
+    """Per-bone rescale the 15 mapped body joints to G1 segment lengths (pose preserved). Reconstructs
+    each mapped joint from its (already-scaled) parent using the per-bone ratio; chains are parent-first
+    so one pass suffices. Returns a new array; non-mapped slots are copied through unchanged."""
+    idx = demo_joints.index
+    out = human_joints.copy()
+    # WUJI_WRIST_TO_YAW: body targets the real wrist (elbow->wrist_yaw = 0.86) not the Wuji palm (1.183).
+    wrist_s = 0.86 if os.environ.get("WUJI_WRIST_TO_YAW") == "1" else None
+    for child, parent, s in _PERJOINT_CHAINS:
+        if wrist_s is not None and child in ("L_Wrist", "R_Wrist"):
+            s = wrist_s
+        c, p = idx(child), idx(parent)
+        out[:, c] = out[:, p] + s * (human_joints[:, c] - human_joints[:, p])
+    return out
+
+
 def preprocess_motion_data(
     human_joints,
     retargeter,
@@ -244,8 +276,14 @@ def preprocess_motion_data(
 
     human_joints[:, :, 2] -= z_min
 
-    # Scale human joints
-    human_joints = human_joints * scale
+    # Scale human joints: per-bone SOMA-style (env-gated A/B) or the uniform robot_height/human_height.
+    if os.environ.get("WUJI_PERJOINT_SCALE") == "1":
+        human_joints = per_joint_rescale(human_joints, retargeter.demo_joints)
+        # re-ground: per-bone leg rescaling moves the feet, so drop the whole body back onto the floor
+        # (this also lowers the pelvis to match the rescaled legs).
+        human_joints[:, :, 2] -= human_joints[:, toe_indices, 2].min()
+    else:
+        human_joints = human_joints * scale
 
     if object_poses is not None:
         object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale

@@ -5,6 +5,8 @@ import time
 from pathlib import Path
 from types import ModuleType
 
+import os
+
 import cvxpy as cp  # type: ignore[import-not-found]
 import mujoco  # type: ignore[import-not-found]
 import numpy as np
@@ -98,8 +100,27 @@ class InteractionMeshRetargeter:
         self.visualize = visualize
         self.debug = debug
         self.demo_joints = task_constants.DEMO_JOINTS
-        self.laplacian_match_links = task_constants.JOINTS_MAPPING
+        self.laplacian_match_links = dict(task_constants.JOINTS_MAPPING)   # COPY (may be mutated below)
         self.task_constants = task_constants
+
+        # EXPERIMENTAL (M1 ablation). Body models built WITHOUT the Wuji palm resolve wj_*_palm_link to -1, which
+        # numpy indexes as xpos[-1] = the OBJECT body -> two FALSE wrist vertices land on the object and corrupt the
+        # shoulder-elbow-wrist mesh. WUJI_DROP_WRIST=1 removes those wrist links so the mesh keeps only valid links
+        # (isolates the harm of the false constraints vs simply having no wrist target). Default off -> unchanged.
+        if os.environ.get("WUJI_DROP_WRIST", "0") == "1":
+            for k in ("L_Wrist", "R_Wrist"):
+                self.laplacian_match_links.pop(k, None)
+            print(f"[wrist-ablation] dropped wrist links; mesh links = {list(self.laplacian_match_links)}")
+
+        # EXPERIMENTAL: body maps up to the REAL wrist (wrist_yaw), not the Wuji palm — the Wuji hand is
+        # retargeted separately (Stage B), so the body shouldn't chase the palm (which sticks ~6.75cm past
+        # the wrist and dips the target below surfaces). Pair with the wrist bone scaled to elbow->wrist_yaw
+        # in per_joint_rescale. Default off -> unchanged (still maps to wj_*_palm_link).
+        if os.environ.get("WUJI_WRIST_TO_YAW", "0") == "1":
+            for k, v in {"L_Wrist": "left_wrist_yaw_link", "R_Wrist": "right_wrist_yaw_link"}.items():
+                if k in self.laplacian_match_links:
+                    self.laplacian_match_links[k] = v
+            print(f"[wrist-to-yaw] wrist -> {[self.laplacian_match_links.get(k) for k in ('L_Wrist', 'R_Wrist')]}")
 
         self.smplh_mapped_joint_indices = [self.demo_joints.index(name) for name in self.laplacian_match_links]
 
@@ -127,6 +148,7 @@ class InteractionMeshRetargeter:
         print("Loading robot model from: ", robot_xml_path)
 
         self.robot_data = mujoco.MjData(self.robot_model)
+        self._audit_mapped_links()                       # print resolved ids + FAIL LOUD on any missing body
         self._init_self_collision(self._self_collision_config)
 
         if self.robot_data.qpos.shape[0] > 7 + self.task_constants.ROBOT_DOF:
@@ -173,6 +195,45 @@ class InteractionMeshRetargeter:
         self.w_nominal_tracking_init = w_nominal_tracking_init
         self.nominal_tracking_tau = nominal_tracking_tau
         self.track_nominal_indices = task_constants.NOMINAL_TRACKING_INDICES
+
+        # --- Body-pose priors (EXPERIMENTAL ablation B1/B2). Default weights 0.0 -> the objective is
+        #     byte-identical to the original (B0). Enabled per-run via env vars for the frame-0/stand-up
+        #     "banana" study (the free root drifts: pelvis-forward + torso-back, because for the original
+        #     run q_nominal is None so root/legs have no absolute reference). See geometry_audit/exp_body_priors.py.
+        #       B1  WUJI_W_TORSO_DIR : robot pelvis->shoulder-center DIRECTION toward the human's (source-relative:
+        #                              keeps the real forward push lean, rejects the artificial backward lean).
+        #       B2  WUJI_W_PELVIS_XY : robot pelvis (x,y) toward the human pelvis (x,y) in world. The base is free
+        #                              (q_a_init_idx=-7) so pelvis xy ARE q_a[0:2] -> this is a pure config-space term.
+        self.w_torso_dir = float(os.environ.get("WUJI_W_TORSO_DIR", 0.0))
+        self.w_pelvis_xy = float(os.environ.get("WUJI_W_PELVIS_XY", 0.0))
+        self.torso_pelvis_link = "pelvis_contour_link"
+        self.torso_shoulder_links = ["left_shoulder_roll_link", "right_shoulder_roll_link"]
+        # Format-aware joint lookup (smplh 'Pelvis'/'L_Shoulder' vs mocap/lafan 'Hips'/'LeftShoulder'); -1 if
+        # absent -- these feed ONLY the optional body-pose priors (w_torso_dir / w_pelvis_xy, default off).
+        def _find(*aliases):
+            return next((self.demo_joints.index(a) for a in aliases if a in self.demo_joints), -1)
+        self._hj_pelvis = _find("Pelvis", "Hips")
+        self._hj_lshoulder = _find("L_Shoulder", "LeftShoulder")
+        self._hj_rshoulder = _find("R_Shoulder", "RightShoulder")
+        if self.w_torso_dir or self.w_pelvis_xy:
+            print(f"[body-priors] w_torso_dir={self.w_torso_dir} w_pelvis_xy={self.w_pelvis_xy}")
+
+    def _audit_mapped_links(self) -> None:
+        """Startup audit: resolve every mapped source joint -> robot body -> id, and FAIL LOUD if any body is
+        missing (id < 0). Previously a missing link (e.g. wj_*_palm_link on a non-Wuji body model) silently
+        became xpos[-1] = the object body, injecting a false mesh vertex. Never allow -1 into xpos again."""
+        print("[link-audit] source_joint -> robot_body : id")
+        missing = []
+        for src, body in self.laplacian_match_links.items():
+            bid = mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_BODY, body)
+            print(f"[link-audit]   {src:12} -> {body:32} : {bid}")
+            if bid < 0:
+                missing.append((src, body))
+        if missing:
+            raise ValueError(
+                f"Mapped body does not exist in the loaded model (would resolve to xpos[-1] = the object): "
+                f"{missing}. Load a model that HAS these links (e.g. the Wuji-welded model with wj_*_palm_link), "
+                f"or set WUJI_DROP_WRIST=1 to drop the wrist links from the interaction mesh.")
 
     def _init_foot_lock(self, foot_lock: FootLockConfig | None) -> None:
         """Initialize foot lock configuration and normalize window mappings."""
@@ -427,8 +488,20 @@ class InteractionMeshRetargeter:
                         object_quat_demo, object_trans_demo, human_mapped_joints
                     )
 
+                # GROUND-AWARE E_IM (diagnostic; ADDITIVE, gated by self.ground_points_world; None => unchanged):
+                # a FIXED world z=0 grid -> object-local per frame, concatenated to the object points so the
+                # Delaunay connects foot landmarks to nearby ground points (encodes toe/heel-ground per frame).
+                _gw = getattr(self, "ground_points_world", None)
+                if _gw is not None:
+                    _floor_local = (_gw if self.object_name == "ground"
+                                    else transform_points_world_to_local(object_quat_demo, object_trans_demo, _gw))
+                    _obj_src = np.vstack([object_points_local_demo, _floor_local])
+                    _obj_tgt = np.vstack([object_points_local, _floor_local])
+                else:
+                    _obj_src, _obj_tgt = object_points_local_demo, object_points_local
+
                 source_vertices, source_tetrahedra = create_interaction_mesh(
-                    np.vstack([human_mapped_joints_in_object, object_points_local_demo])
+                    np.vstack([human_mapped_joints_in_object, _obj_src])
                 )
                 tetrahedra.append(source_tetrahedra)
 
@@ -461,19 +534,35 @@ class InteractionMeshRetargeter:
                 else:
                     w_nominal_tracking = self.w_nominal_tracking_init * np.exp(-i / self.nominal_tracking_tau)
 
+                # Body-pose prior targets (B1 torso-direction, B2 pelvis-xy), world frame, from the human joints.
+                torso_dir_target = None
+                pelvis_xy_target = None
+                if self.w_torso_dir > 0 or self.w_pelvis_xy > 0:
+                    pel_h = human_joint_motions[i, self._hj_pelvis]
+                    sh_h = 0.5 * (human_joint_motions[i, self._hj_lshoulder] + human_joint_motions[i, self._hj_rshoulder])
+                    if self.w_pelvis_xy > 0:
+                        pelvis_xy_target = np.asarray(pel_h[:2], dtype=float).copy()
+                    if self.w_torso_dir > 0:
+                        d_h = np.asarray(sh_h - pel_h, dtype=float)
+                        nrm_h = np.linalg.norm(d_h)
+                        if nrm_h > 1e-6:
+                            torso_dir_target = d_h / nrm_h
+
                 q, cost = self.iterate(
                     q_locked=q_locked_list[i],
                     q_n=q,
                     q_t_last=retargeted_motions[-1],
                     target_laplacian=target_laplacian,
                     adj_list=adj_list,
-                    obj_pts_local=object_points_local,
+                    obj_pts_local=_obj_tgt,
                     foot_sticking=foot_sticking_sequences[i],
                     w_nominal_tracking=w_nominal_tracking,
                     q_a_nominal=(q_nominal_list[i, self.q_a_indices] if q_nominal_list is not None else None),
                     init_t=i == 0,
                     n_iter=50 if i == 0 else 10,
                     frame_idx=i,
+                    torso_dir_target=torso_dir_target,
+                    pelvis_xy_target=pelvis_xy_target,
                 )
                 if self.debug:
                     robot_link_positions = self._get_robot_link_positions(
@@ -565,6 +654,8 @@ class InteractionMeshRetargeter:
         verbose=False,
         init_t=False,
         frame_idx: int = 0,
+        torso_dir_target: np.ndarray | None = None,
+        pelvis_xy_target: np.ndarray | None = None,
     ):
         """The main function to solve a single iteration of the DiffIK problem.
         Args:
@@ -719,6 +810,27 @@ class InteractionMeshRetargeter:
                 z = dqa[idx] - (q_a_nominal[idx] - q_a_n_last[idx])
                 obj_terms.append(w_nominal_tracking * cp.sum_squares(z))
 
+        # --- B2: pelvis-XY tracking. Base is free (q_a_init_idx=-7) so pelvis world x,y ARE q_a[0:2];
+        #     pull them toward the human pelvis xy. Grounds the absolute root position the Laplacian ignores. ---
+        if self.w_pelvis_xy > 0 and pelvis_xy_target is not None:
+            resid_xy = (q_a_n_last[0:2] + dqa[0:2]) - pelvis_xy_target
+            obj_terms.append(self.w_pelvis_xy * cp.sum_squares(resid_xy))
+
+        # --- B1: torso-direction tracking. Match the robot pelvis->shoulder-center unit direction to the human's
+        #     (source-relative -> preserves the true push lean, rejects the artificial backward lean). The normalized
+        #     direction is linearized about the current d0 = p_sh - p_pel: u ~= u0 + (I - u0 u0^T)/||d0|| * J_d dqa. ---
+        if self.w_torso_dir > 0 and torso_dir_target is not None:
+            tl = {"pel": self.torso_pelvis_link,
+                  "l": self.torso_shoulder_links[0], "r": self.torso_shoulder_links[1]}
+            Jt, pt, _ = self._calc_manipulator_jacobians(q, links=tl, obj_frame=False)   # world pos + world J (q_a cols)
+            p_pel = pt["pel"]; p_sh = 0.5 * (pt["l"] + pt["r"])
+            J_d = 0.5 * Jt["l"] + 0.5 * Jt["r"] - Jt["pel"]                               # (3 x nq_a) d(p_sh - p_pel)/dqa
+            d0 = p_sh - p_pel; nrm_d = float(np.linalg.norm(d0)) + 1e-9
+            u0 = d0 / nrm_d
+            P = (np.eye(3) - np.outer(u0, u0)) / nrm_d                                    # d(unit dir)/d(d0), linearized
+            PJ = P @ J_d                                                                  # (3 x nq_a)
+            obj_terms.append(self.w_torso_dir * cp.sum_squares((u0 - torso_dir_target) + PJ @ dqa))
+
         # Q_diag cost
         Qd = np.asarray(self.Q_diag, dtype=float).reshape(-1)
         obj_terms.append(cp.sum_squares(cp.multiply(np.sqrt(Qd), dqa + q_a_n_last)))
@@ -734,6 +846,53 @@ class InteractionMeshRetargeter:
             else:
                 # if a full matrix was supplied, fall back to quad_form
                 obj_terms.append(cp.quad_form(dqa - dqa_smooth, Wsmooth))
+
+        # --- CONTACT-AWARE foot support (diagnostic; ADDITIVE, gated by self.contact_schedule; None => no-op) ---
+        # schedule[frame] = list of (link_name, axes_tuple, target_world_xyz, ramp_weight, tol):
+        #   ramp_weight >= 1 -> hard bounded box on the masked axes; 0 < w < 1 -> soft quadratic penalty (ramp).
+        _csched = getattr(self, "contact_schedule", None)
+        if _csched is not None and frame_idx in _csched:
+            _wc = getattr(self, "contact_weight", 200.0)
+            for _link, _axes, _target, _wt, _tol in _csched[frame_idx]:
+                _Jc, _pc, _ = self._calc_manipulator_jacobians(q, links={_link: _link}, obj_frame=False)
+                _J = _Jc[_link][:, self.q_a_indices]; _p = _pc[_link]
+                for _ax in _axes:
+                    _resid = (float(_target[_ax]) - float(_p[_ax])) - _J[_ax] @ dqa   # post-step deviation from target
+                    if _wt >= 1.0:
+                        add("contact_hard", [_resid <= _tol, _resid >= -_tol])
+                    else:
+                        obj_terms.append((_wt * _wc) * cp.square(_resid))
+
+        # --- foot_height_tracking (EXPERIMENTAL, gated by self.w_foot_z>0 + self.foot_z_targets; default OFF via getattr) ---
+        # Continuous soft Z-only tracking of demonstrated foot clearance for each contact point (toe + heel, per foot).
+        # foot_z_targets[frame_idx] = list of (link_name, z_target_world); z_target already encodes
+        #   z_robot_floor + z_calibrated_contact_center + max(0, z_human_point - z_human_floor) (computed by the runner).
+        # NO discrete flat/toe/swing modes, NO frame-range locks, NO root-Z term. Normalized by the number of points.
+        _fz = getattr(self, "foot_z_targets", None)
+        if getattr(self, "w_foot_z", 0.0) > 0 and _fz is not None and frame_idx in _fz:
+            _pts = _fz[frame_idx]; _npt = max(1, len(_pts))
+            for _lnk, _ztgt in _pts:
+                _Jf, _pf, _ = self._calc_manipulator_jacobians(q, links={_lnk: _lnk}, obj_frame=False)
+                _Jz = _Jf[_lnk][2, self.q_a_indices]; _pz = float(_pf[_lnk][2])
+                _rz = (float(_ztgt) - _pz) - _Jz @ dqa                          # linearized post-step Z error
+                obj_terms.append((self.w_foot_z / _npt) * cp.square(_rz))
+
+        # --- wrist_object_target (EXPERIMENTAL, gated by self.w_wrist>0 + self.wrist_obj_targets; default OFF) ---
+        # Soft OBJECT-FRAME position target for each rubber_hand wrist, restricted to ALLOWED columns (waist+arms) so
+        # the term has EXACTLY ZERO derivative wrt root translation/rotation and legs. Confidence-gated, normalized by
+        # active hands. wrist_obj_targets[frame_idx] = list of (link_name, target_obj_local(3,), confidence).
+        _wt = getattr(self, "wrist_obj_targets", None)
+        if getattr(self, "w_wrist", 0.0) > 0 and _wt is not None and frame_idx in _wt:
+            _cols = getattr(self, "wrist_allowed_cols", None)
+            _act = [(l, t, cf) for (l, t, cf) in _wt[frame_idx] if cf > 1e-3]
+            _nh = max(1, len(_act))
+            for _lnk, _tgt, _cf in _act:
+                _Jw, _pw, _ = self._calc_manipulator_jacobians(q, links={_lnk: _lnk}, obj_frame=True)
+                _J = _Jw[_lnk].copy()                                          # (3 x nq_a), object frame
+                if _cols is not None:
+                    _m = np.zeros(_J.shape[1]); _m[np.asarray(_cols, dtype=int)] = 1.0; _J = _J * _m[None, :]
+                _e0 = _pw[_lnk] - np.asarray(_tgt, dtype=float)                # object-frame residual
+                obj_terms.append((self.w_wrist * float(_cf) / _nh) * cp.sum_squares(_e0 + _J @ dqa))
 
         problem = cp.Problem(cp.Minimize(cp.sum(obj_terms)), constraints)
 
@@ -843,6 +1002,8 @@ class InteractionMeshRetargeter:
         init_t: bool = False,
         n_iter: int = 10,
         frame_idx: int = 0,
+        torso_dir_target: np.ndarray | None = None,
+        pelvis_xy_target: np.ndarray | None = None,
     ):
         """Iterate the solver for multiple iterations."""
         last_cost = np.inf
@@ -860,6 +1021,8 @@ class InteractionMeshRetargeter:
                 w_nominal_tracking=w_nominal_tracking,
                 init_t=init_t,
                 frame_idx=frame_idx,
+                torso_dir_target=torso_dir_target,
+                pelvis_xy_target=pelvis_xy_target,
             )
             if np.isclose(cost, last_cost):
                 break
