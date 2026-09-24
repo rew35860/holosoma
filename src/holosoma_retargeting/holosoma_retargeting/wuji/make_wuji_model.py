@@ -39,8 +39,15 @@ ADAPTER_STANDOFF = 0.026
 MOUNT_X = FLANGE_X + ADAPTER_STANDOFF                 # palm distance from wrist along +x
 QUAT_R = QUAT_L = [0.7071068, 0.0, 0.7071068, 0.0]
 
+# Connector (docking-adapter) mesh filling the flange->palm gap -- the Wuji equivalent of
+# BrainCo's base2_link. Visual only in sim (the real part mates the G1 flange to the hand).
+# Centered in the gap; certify placement by rendering vs the assembled drawing, tweak if off.
+CONNECTOR_STL = WUJI / "docking/meshes/hand_docking_link.STL"
+CONNECTOR_X = (FLANGE_X + MOUNT_X) / 2
+CONNECTOR_QUAT = QUAT_R                                # connector long axis (z) -> arm +x
 
-def make(obj_name=None, px=MOUNT_X, weld=False):
+
+def make(obj_name=None, px=MOUNT_X, weld=False, coacd=False, coacd_threshold=0.05, collide=False):
     if not (WUJI / "mjcf/left.xml").is_file():
         sys.exit(f"Wuji hand description not found at {WUJI}. Clone wuji-hand-description and set "
                  f"$WUJI_HAND_DESCRIPTION. (The pre-built models in {G1DIR} already work without it.)")
@@ -55,6 +62,16 @@ def make(obj_name=None, px=MOUNT_X, weld=False):
     fr = g1.body("right_wrist_yaw_link").add_frame(); fr.pos = [px, 0, 0]; fr.quat = QUAT_R
     g1.attach(wl, prefix="wj_", frame=fl)
     g1.attach(wr, prefix="wjr_", frame=fr)
+
+    if CONNECTOR_STL.is_file():                       # connector mesh (visual) bridging wrist -> palm
+        g1.add_mesh(name="wuji_connector", file=str(CONNECTOR_STL))
+        for pfx, wb in (("wj_left", "left_wrist_yaw_link"), ("wjr_right", "right_wrist_yaw_link")):
+            cb = g1.body(wb).add_body(name=f"{pfx}_connector_link", pos=[CONNECTOR_X, 0, 0], quat=CONNECTOR_QUAT)
+            cg = cb.add_geom()
+            cg.type = mujoco.mjtGeom.mjGEOM_MESH
+            cg.meshname = "wuji_connector"
+            cg.contype = 0; cg.conaffinity = 0        # visual only
+            cg.rgba = [0.55, 0.57, 0.62, 1.0]
 
     if weld:
         # Weld fingers (drop their actuators+joints -> rigid open, robot_dof stays 29) and make
@@ -78,6 +95,7 @@ def make(obj_name=None, px=MOUNT_X, weld=False):
         b = g1.worldbody.add_body(name=f"{obj_name}_link", pos=[0.5, 0.0, 0.3])
         b.add_freejoint()
         gm = b.add_geom()
+        gm.name = f"{obj_name}_visual"                 # named so downstream geom-name checks find it
         gm.type = mujoco.mjtGeom.mjGEOM_MESH
         gm.meshname = f"{obj_name}_mesh"
         gm.rgba = [0.8, 0.5, 0.3, 1.0]
@@ -86,8 +104,35 @@ def make(obj_name=None, px=MOUNT_X, weld=False):
         gm.contype = 0
         gm.conaffinity = 0
 
+        if coacd:
+            # CoACD collision proxy: replace the single convex hull (which MuJoCo would fit to the
+            # whole concave mesh) with convex pieces that hug the true surface. The pieces are added
+            # as extra geoms on the SAME object body, invisible and non-colliding -- the hand
+            # retargeter queries them via mj_geomDistance (see wuji/hand_retarget_omni.py --non-pen).
+            pieces_dir = REPO / f"models/decomp/{obj_name}"
+            piece_files = sorted(pieces_dir.glob("piece_*.obj"))
+            if not piece_files:                               # generate once, reusing make_decomp
+                import trimesh
+                sys.path.insert(0, str(REPO / "geometry_audit"))  # make_decomp lives with the audits now
+                from make_decomp import decompose_mesh
+                pieces_dir.mkdir(parents=True, exist_ok=True)
+                for i, pc in enumerate(decompose_mesh(trimesh.load(str(mesh), force="mesh"), coacd_threshold)):
+                    pc.export(str(pieces_dir / f"piece_{i:03d}.obj"))
+                piece_files = sorted(pieces_dir.glob("piece_*.obj"))
+            for i, pf in enumerate(piece_files):
+                g1.add_mesh(name=f"{obj_name}_piece_{i:03d}_mesh", file=str(pf))
+                pg = b.add_geom()
+                pg.name = f"{obj_name}_piece_{i:03d}"
+                pg.type = mujoco.mjtGeom.mjGEOM_MESH
+                pg.meshname = f"{obj_name}_piece_{i:03d}_mesh"
+                pg.contype = 1 if collide else 0             # PART 3 full model: collidable fingers<->object
+                pg.conaffinity = 1 if collide else 0
+                if collide:
+                    pg.friction = [0.9, 0.5, 0.5]            # push-friendly friction (matches the table baseline)
+                pg.rgba = [0.3, 0.6, 0.9, 0.0]                # invisible (visual mesh shows the object)
+
     g1.compile()
-    tag = ("_welded" if weld else "") + (("_w_" + obj_name) if obj_name else "")
+    tag = ("_welded" if weld else "") + (("_w_" + obj_name) if obj_name else "") + ("_coacd" if coacd else "")
     out = G1DIR / f"g1_29dof_wuji{tag}.xml"
     out.write_text(g1.to_xml())
     m = mujoco.MjModel.from_xml_path(str(out))
@@ -99,6 +144,8 @@ def make(obj_name=None, px=MOUNT_X, weld=False):
 
 if __name__ == "__main__":
     weld = "--weld" in sys.argv
+    coacd = "--coacd" in sys.argv
+    collide = "--collide" in sys.argv                        # PART 3 full model: object CoACD collidable
     pos = [a for a in sys.argv[1:] if not a.startswith("-")]
     arg = pos[0] if pos and pos[0] not in ("none", "-") else None
-    make(arg, float(pos[1]) if len(pos) > 1 else MOUNT_X, weld=weld)
+    make(arg, float(pos[1]) if len(pos) > 1 else MOUNT_X, weld=weld, coacd=coacd, collide=collide)

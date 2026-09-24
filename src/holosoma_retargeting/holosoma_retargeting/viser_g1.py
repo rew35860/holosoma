@@ -34,9 +34,10 @@ parser.add_argument("save_dir", nargs="?",
                     help="dir holding <task>_original.npz")
 parser.add_argument("--port", type=int, default=8080)
 parser.add_argument("--fps", type=int, default=0, help="override fps (0 = use npz fps)")
+parser.add_argument("--wuji", action="store_true", help="use the fingered Wuji model (nq=83) to show finger articulation")
 args = parser.parse_args()
 
-XML = f"models/g1/g1_29dof_w_{args.object}.xml"
+XML = f"models/g1/g1_29dof_wuji_w_{args.object}.xml" if args.wuji else f"models/g1/g1_29dof_w_{args.object}.xml"
 NPZ = f"{args.save_dir}/{args.task}_original.npz"
 
 # ── load model + trajectory ──
