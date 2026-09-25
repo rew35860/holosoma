@@ -236,10 +236,11 @@ def preprocess_motion_data(
         # On a mat.
         z_min -= mat_height
 
-    # Save raw frame-0 hand z BEFORE we mutate human_joints — used to pick the
-    # right object z-scaling branch below. mujoco-ordered wrist indices come from
-    # interact2mimic's smpl_2_mujoco_new: L_Wrist=17, R_Wrist=36.
-    L_WRIST_IDX, R_WRIST_IDX = 17, 36
+    # Save raw frame-0 wrist z before mutating the joints. The input registry
+    # defines each format's order: SMPL-H and SMPL-X place the wrists at
+    # different indices. Using the names preserves the intended in-hand test.
+    L_WRIST_IDX = retargeter.demo_joints.index("L_Wrist")
+    R_WRIST_IDX = retargeter.demo_joints.index("R_Wrist")
     hand_z_min_raw = min(human_joints[0, L_WRIST_IDX, 2], human_joints[0, R_WRIST_IDX, 2])
 
     human_joints[:, :, 2] -= z_min
@@ -262,7 +263,13 @@ def preprocess_motion_data(
         # branch (preserve object_z0, don't z-scale) to test whether a tall
         # floor-standing object stops sinking.
         _force_floor_rest = os.environ.get("HOLOSOMA_FORCE_FLOOR_REST") == "1"
-        if (not _force_floor_rest) and abs(obj_z0 - hand_z_min_raw) < in_hand_threshold:
+        _match_umr_translation = os.environ.get("HOLOSOMA_HUMOTO_MATCH_UMR_OBJECT_TRANSLATION") == "1"
+        if _match_umr_translation:
+            # Comparison-only HUMOTO variant: UMR scales all three source-object
+            # translation coordinates uniformly while leaving its mesh full size.
+            # Keep Omni's foot normalization for the HUMAN; match object target z.
+            object_poses[:, -1] *= scale
+        elif (not _force_floor_rest) and abs(obj_z0 - hand_z_min_raw) < in_hand_threshold:
             # in-hand: scale z fully
             object_poses[:, -1] = (object_poses[:, -1] - z_min) * scale
         else:
