@@ -40,43 +40,6 @@
     <mesh name="right_rubber_hand_link" content_type="model/obj" file="right_rubber_hand.obj"/>
 
     <mesh name="woodchair_mesh" file="../../woodchair/woodchair.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_0_mesh" file="../../woodchair/coacd/woodchair_coacd_0.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_1_mesh" file="../../woodchair/coacd/woodchair_coacd_1.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_2_mesh" file="../../woodchair/coacd/woodchair_coacd_2.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_3_mesh" file="../../woodchair/coacd/woodchair_coacd_3.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_4_mesh" file="../../woodchair/coacd/woodchair_coacd_4.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_5_mesh" file="../../woodchair/coacd/woodchair_coacd_5.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_6_mesh" file="../../woodchair/coacd/woodchair_coacd_6.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_7_mesh" file="../../woodchair/coacd/woodchair_coacd_7.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_8_mesh" file="../../woodchair/coacd/woodchair_coacd_8.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_9_mesh" file="../../woodchair/coacd/woodchair_coacd_9.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_10_mesh" file="../../woodchair/coacd/woodchair_coacd_10.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_11_mesh" file="../../woodchair/coacd/woodchair_coacd_11.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_12_mesh" file="../../woodchair/coacd/woodchair_coacd_12.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_13_mesh" file="../../woodchair/coacd/woodchair_coacd_13.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_14_mesh" file="../../woodchair/coacd/woodchair_coacd_14.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_15_mesh" file="../../woodchair/coacd/woodchair_coacd_15.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_16_mesh" file="../../woodchair/coacd/woodchair_coacd_16.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_17_mesh" file="../../woodchair/coacd/woodchair_coacd_17.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_18_mesh" file="../../woodchair/coacd/woodchair_coacd_18.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_19_mesh" file="../../woodchair/coacd/woodchair_coacd_19.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_20_mesh" file="../../woodchair/coacd/woodchair_coacd_20.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_21_mesh" file="../../woodchair/coacd/woodchair_coacd_21.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_22_mesh" file="../../woodchair/coacd/woodchair_coacd_22.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_23_mesh" file="../../woodchair/coacd/woodchair_coacd_23.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_24_mesh" file="../../woodchair/coacd/woodchair_coacd_24.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_25_mesh" file="../../woodchair/coacd/woodchair_coacd_25.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_26_mesh" file="../../woodchair/coacd/woodchair_coacd_26.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_27_mesh" file="../../woodchair/coacd/woodchair_coacd_27.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_28_mesh" file="../../woodchair/coacd/woodchair_coacd_28.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_29_mesh" file="../../woodchair/coacd/woodchair_coacd_29.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_30_mesh" file="../../woodchair/coacd/woodchair_coacd_30.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_31_mesh" file="../../woodchair/coacd/woodchair_coacd_31.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_32_mesh" file="../../woodchair/coacd/woodchair_coacd_32.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_33_mesh" file="../../woodchair/coacd/woodchair_coacd_33.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_34_mesh" file="../../woodchair/coacd/woodchair_coacd_34.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_35_mesh" file="../../woodchair/coacd/woodchair_coacd_35.obj" scale="1 1 1"/>
-    <mesh name="woodchair_coacd_36_mesh" file="../../woodchair/coacd/woodchair_coacd_36.obj" scale="1 1 1"/>
   </asset>
 
   <worldbody>
@@ -396,45 +359,13 @@
     <body name="woodchair_link">
         <freejoint/>
         <inertial pos="0 0 0" mass="0.1" diaginertia="0.002 0.002 0.002"/>
-        <geom name="woodchair" type="mesh" mesh="woodchair_mesh" contype="0" conaffinity="0"
-                group="2" rgba="0.7 0.8 0.9 0.7"/>
-        <geom name="woodchair_coacd_0" type="mesh" mesh="woodchair_coacd_0_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_1" type="mesh" mesh="woodchair_coacd_1_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_2" type="mesh" mesh="woodchair_coacd_2_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_3" type="mesh" mesh="woodchair_coacd_3_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_4" type="mesh" mesh="woodchair_coacd_4_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_5" type="mesh" mesh="woodchair_coacd_5_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_6" type="mesh" mesh="woodchair_coacd_6_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_7" type="mesh" mesh="woodchair_coacd_7_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_8" type="mesh" mesh="woodchair_coacd_8_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_9" type="mesh" mesh="woodchair_coacd_9_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_10" type="mesh" mesh="woodchair_coacd_10_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_11" type="mesh" mesh="woodchair_coacd_11_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_12" type="mesh" mesh="woodchair_coacd_12_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_13" type="mesh" mesh="woodchair_coacd_13_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_14" type="mesh" mesh="woodchair_coacd_14_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_15" type="mesh" mesh="woodchair_coacd_15_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_16" type="mesh" mesh="woodchair_coacd_16_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_17" type="mesh" mesh="woodchair_coacd_17_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_18" type="mesh" mesh="woodchair_coacd_18_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_19" type="mesh" mesh="woodchair_coacd_19_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_20" type="mesh" mesh="woodchair_coacd_20_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_21" type="mesh" mesh="woodchair_coacd_21_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_22" type="mesh" mesh="woodchair_coacd_22_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_23" type="mesh" mesh="woodchair_coacd_23_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_24" type="mesh" mesh="woodchair_coacd_24_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_25" type="mesh" mesh="woodchair_coacd_25_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_26" type="mesh" mesh="woodchair_coacd_26_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_27" type="mesh" mesh="woodchair_coacd_27_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_28" type="mesh" mesh="woodchair_coacd_28_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_29" type="mesh" mesh="woodchair_coacd_29_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_30" type="mesh" mesh="woodchair_coacd_30_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_31" type="mesh" mesh="woodchair_coacd_31_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_32" type="mesh" mesh="woodchair_coacd_32_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_33" type="mesh" mesh="woodchair_coacd_33_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_34" type="mesh" mesh="woodchair_coacd_34_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_35" type="mesh" mesh="woodchair_coacd_35_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
-        <geom name="woodchair_coacd_36" type="mesh" mesh="woodchair_coacd_36_mesh" contype="1" conaffinity="1" group="3" rgba="0.25 0.45 0.8 0.25" friction="0.9 0.5 0.5" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+        <geom name="woodchair" type="mesh" mesh="woodchair_mesh"
+                contype="1" conaffinity="1"
+                pos="0 0 0" quat="1 0 0 0"
+                rgba="0.7 0.8 0.9 0.7"
+                friction="0.9 0.5 0.5"
+                solref="0.02 1"
+                solimp="0.9 0.95 0.001"/>
     </body>
 
     <light name="sun" pos="0 0 5" dir="0 0 -1" directional="true"

@@ -340,6 +340,13 @@ def setup_object_data(
         object_local_pts, object_local_pts_demo = load_object_data(
             constants.OBJECT_MESH_FILE, smpl_scale=smpl_scale, sample_count=100
         )
+        if task_config.object_scale_mode == "world_scaled":
+            from holosoma_retargeting.src.world_scaling import scaled_scene
+            scene = constants.ROBOT_URDF_FILE.replace('.urdf', '_w_' + constants.OBJECT_NAME + '.xml')
+            constants.SCENE_XML_FILE = scaled_scene(
+                scene, constants.OBJECT_NAME, smpl_scale, 'generated_objects/world_scaled'
+            )
+            object_local_pts = object_local_pts_demo.copy()
         return object_local_pts, object_local_pts_demo, constants.OBJECT_URDF_FILE
 
     if task_type == "climbing":
@@ -690,6 +697,7 @@ def main(cfg: RetargetingConfig) -> None:
             toe_names,
             scale=smpl_scale,
             object_poses=object_poses,
+            object_scale_mode=cfg.task_config.object_scale_mode if task_type == 'object_interaction' else 'original',
         )
 
     # Initialize robot pose

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,9 @@ class TaskConfig:
     # Auto-determined based on task_type if None: "largebox" for object_interaction,
     # "multi_boxes" for climbing, "ground" for robot_only
     object_name: str | None = None
+
+    object_scale_mode: Literal["original", "world_scaled"] = "original"
+    """Apply the human world transform to object size and translation."""
 
     # Ground meshgrid (robot_only task)
     ground_size: int = 15

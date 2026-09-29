@@ -212,6 +212,7 @@ def preprocess_motion_data(
     scale=0.714,
     mat_height=0.1,
     object_poses=None,
+    object_scale_mode="original",
 ):
     """
     Preprocess human joints and object poses for retargeting.
@@ -240,7 +241,8 @@ def preprocess_motion_data(
     # right object z-scaling branch below. mujoco-ordered wrist indices come from
     # interact2mimic's smpl_2_mujoco_new: L_Wrist=17, R_Wrist=36.
     L_WRIST_IDX, R_WRIST_IDX = 17, 36
-    hand_z_min_raw = min(human_joints[0, L_WRIST_IDX, 2], human_joints[0, R_WRIST_IDX, 2])
+    hand_z_min_raw = (min(human_joints[0, L_WRIST_IDX, 2], human_joints[0, R_WRIST_IDX, 2])
+                      if object_scale_mode == "original" else 0.0)
 
     human_joints[:, :, 2] -= z_min
 
@@ -248,6 +250,12 @@ def preprocess_motion_data(
     human_joints = human_joints * scale
 
     if object_poses is not None:
+        if object_scale_mode == "world_scaled":
+            from holosoma_retargeting.src.world_scaling import scale_object_poses
+            object_poses = scale_object_poses(object_poses, scale, z_min)
+            return human_joints, object_poses, extract_object_first_moving_frame(object_poses)
+        if object_scale_mode != "original":
+            raise ValueError(f"Unknown object_scale_mode: {object_scale_mode}")
         object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale
 
         # Object z-scaling: two regimes
