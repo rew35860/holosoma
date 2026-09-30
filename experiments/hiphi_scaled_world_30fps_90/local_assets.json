@@ -1,0 +1,182 @@
+[
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/ball_a_2/ball_a_2.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/ball_a_2/ball_a_2.obj",
+    "sha256": "72b7b432b4bb7072817efb0b2f529a2c6881ee5aa4ad6f97fc3d7703cce4e83a",
+    "destination_sha256": "72b7b432b4bb7072817efb0b2f529a2c6881ee5aa4ad6f97fc3d7703cce4e83a"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_ball_a_2.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_ball_a_2.xml",
+    "sha256": "a9d0391fce3d345c0599c4a09e4356092be2080bc5fd14d46d6a6675153c4d00",
+    "destination_sha256": "a9d0391fce3d345c0599c4a09e4356092be2080bc5fd14d46d6a6675153c4d00"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/ball_a_3/ball_a_3.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/ball_a_3/ball_a_3.obj",
+    "sha256": "72b7b432b4bb7072817efb0b2f529a2c6881ee5aa4ad6f97fc3d7703cce4e83a",
+    "destination_sha256": "72b7b432b4bb7072817efb0b2f529a2c6881ee5aa4ad6f97fc3d7703cce4e83a"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_ball_a_3.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_ball_a_3.xml",
+    "sha256": "dde2da87c95d8b6cfd31dd3e9c254298cdd993c5d5c04c7243ac88765b578202",
+    "destination_sha256": "dde2da87c95d8b6cfd31dd3e9c254298cdd993c5d5c04c7243ac88765b578202"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/box_a_1/box_a_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/box_a_1/box_a_1.obj",
+    "sha256": "af7d2d5e1f1c171ace7246efb3e0beb6f18674898e8034ce128f3526cca9c256",
+    "destination_sha256": "af7d2d5e1f1c171ace7246efb3e0beb6f18674898e8034ce128f3526cca9c256"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_a_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_a_1.xml",
+    "sha256": "271973ad1b5a95036c3d702b61a616e9fb566f8e1da06c816b897b87a631d4f6",
+    "destination_sha256": "271973ad1b5a95036c3d702b61a616e9fb566f8e1da06c816b897b87a631d4f6"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/box_a_2/box_a_2.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/box_a_2/box_a_2.obj",
+    "sha256": "f4d614d080e1dafa575ae56b4320d758f06145095d76bd12b04f7d532632ae72",
+    "destination_sha256": "f4d614d080e1dafa575ae56b4320d758f06145095d76bd12b04f7d532632ae72"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_a_2.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_a_2.xml",
+    "sha256": "0e2461f7f5000914cd44a95eb2b59cfc23f1dafec65d94f10f4fc0d87b6d44f3",
+    "destination_sha256": "0e2461f7f5000914cd44a95eb2b59cfc23f1dafec65d94f10f4fc0d87b6d44f3"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/box_h_1/box_h_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/box_h_1/box_h_1.obj",
+    "sha256": "56ca38d421c17aec9b69cdb6a2a8623b08c9715be7efec6857bab451f0a6c410",
+    "destination_sha256": "56ca38d421c17aec9b69cdb6a2a8623b08c9715be7efec6857bab451f0a6c410"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_h_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_h_1.xml",
+    "sha256": "ec0dd7dc2e1c5c1d685ae042595b89b177bb651989598a76152458c3d50da69f",
+    "destination_sha256": "ec0dd7dc2e1c5c1d685ae042595b89b177bb651989598a76152458c3d50da69f"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/box_h_2/box_h_2.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/box_h_2/box_h_2.obj",
+    "sha256": "3cfedc37d2d48187f60c02ec9f531e5b4992430d55471209e45dd0c6b7855774",
+    "destination_sha256": "3cfedc37d2d48187f60c02ec9f531e5b4992430d55471209e45dd0c6b7855774"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_h_2.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_h_2.xml",
+    "sha256": "8626502ef020881958e39076bc9f840dfac73776caac28f3f8af5c9e1f73d6c4",
+    "destination_sha256": "8626502ef020881958e39076bc9f840dfac73776caac28f3f8af5c9e1f73d6c4"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/box_i_1/box_i_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/box_i_1/box_i_1.obj",
+    "sha256": "a5aa8a32f39ddbf71460b082e85f29d29a35dbece0d82893014224fac1ae2700",
+    "destination_sha256": "a5aa8a32f39ddbf71460b082e85f29d29a35dbece0d82893014224fac1ae2700"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_i_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_box_i_1.xml",
+    "sha256": "7ff565bfdda47d7d128bd5f9d567ed61120f2aae98808c2d2bfb9a9d4a511d3c",
+    "destination_sha256": "7ff565bfdda47d7d128bd5f9d567ed61120f2aae98808c2d2bfb9a9d4a511d3c"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/bucket_b_1/bucket_b_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/bucket_b_1/bucket_b_1.obj",
+    "sha256": "2bf27090c978e997a65fd368fa3d137bb73133ac921b9dc93c028d5cde8ecda7",
+    "destination_sha256": "2bf27090c978e997a65fd368fa3d137bb73133ac921b9dc93c028d5cde8ecda7"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_bucket_b_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_bucket_b_1.xml",
+    "sha256": "e06605b9268c7513a206e46b96ba64e81f3b596a849763f917217aa9c8b3143c",
+    "destination_sha256": "e06605b9268c7513a206e46b96ba64e81f3b596a849763f917217aa9c8b3143c"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/chair_q_1/chair_q_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/chair_q_1/chair_q_1.obj",
+    "sha256": "b50a6e21731421cd409c3eb7786a1c2fd607a32ccfa1aa31c34f7586a6c5f517",
+    "destination_sha256": "b50a6e21731421cd409c3eb7786a1c2fd607a32ccfa1aa31c34f7586a6c5f517"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_chair_q_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_chair_q_1.xml",
+    "sha256": "2d1c4caba97cd15d113a92dc0c64bf27e5fc2e3b3e2c441f57758763f78b9fc8",
+    "destination_sha256": "2d1c4caba97cd15d113a92dc0c64bf27e5fc2e3b3e2c441f57758763f78b9fc8"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/chair_s_1/chair_s_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/chair_s_1/chair_s_1.obj",
+    "sha256": "083f2741b77638964beedfee169935aa35cc113119ee3459f3b77ab175a3ab15",
+    "destination_sha256": "083f2741b77638964beedfee169935aa35cc113119ee3459f3b77ab175a3ab15"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_chair_s_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_chair_s_1.xml",
+    "sha256": "ed97fa63fa10661cb9cca4ceffaa6e8bd273ab377fadea60bada3e739f3ef684",
+    "destination_sha256": "ed97fa63fa10661cb9cca4ceffaa6e8bd273ab377fadea60bada3e739f3ef684"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/clothrack_a_1/clothrack_a_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/clothrack_a_1/clothrack_a_1.obj",
+    "sha256": "81615d59c471500860df4db5451482ce4917a6f1aae65376f9c7859ef12ec6b7",
+    "destination_sha256": "81615d59c471500860df4db5451482ce4917a6f1aae65376f9c7859ef12ec6b7"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_clothrack_a_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_clothrack_a_1.xml",
+    "sha256": "13f6c13c362d087e56c568c408f1e0162c0e85e6bb8c03ffa35e693cb0f9853b",
+    "destination_sha256": "13f6c13c362d087e56c568c408f1e0162c0e85e6bb8c03ffa35e693cb0f9853b"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/table_a_2/table_a_2.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/table_a_2/table_a_2.obj",
+    "sha256": "afc9725501d920ec3aebb1bd83433f49b190fc82a6b34e4bb424dc983e0e01b3",
+    "destination_sha256": "afc9725501d920ec3aebb1bd83433f49b190fc82a6b34e4bb424dc983e0e01b3"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_2.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_2.xml",
+    "sha256": "41b8676ab7eb5df87a6bf35027c46cae15aae93632bdecf4a01fc747bc9561a3",
+    "destination_sha256": "41b8676ab7eb5df87a6bf35027c46cae15aae93632bdecf4a01fc747bc9561a3"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/table_a_3/table_a_3.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/table_a_3/table_a_3.obj",
+    "sha256": "9a113623af9a89aa9a4cf524d8ba48ad6513f35303dfb24968efab9085091211",
+    "destination_sha256": "9a113623af9a89aa9a4cf524d8ba48ad6513f35303dfb24968efab9085091211"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_3.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_3.xml",
+    "sha256": "6c9f51c8158332f3097da26baed5e41c964f48738aa82216995f7b4746906269",
+    "destination_sha256": "6c9f51c8158332f3097da26baed5e41c964f48738aa82216995f7b4746906269"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/table_a_4/table_a_4.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/table_a_4/table_a_4.obj",
+    "sha256": "846a814af3cf867cfe227cf649566888e95cc3a072406001ab4f07f7f92f5eab",
+    "destination_sha256": "846a814af3cf867cfe227cf649566888e95cc3a072406001ab4f07f7f92f5eab"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_4.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_a_4.xml",
+    "sha256": "b11281fde8d79ac008d20d39b4da8e5c405e205b271977b113dea8a0995d0df2",
+    "destination_sha256": "b11281fde8d79ac008d20d39b4da8e5c405e205b271977b113dea8a0995d0df2"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/table_c_1/table_c_1.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/table_c_1/table_c_1.obj",
+    "sha256": "bc99020f787be486384082d7bab911fc2ee04b9d44829cc27f5ddbe7bf5a76b1",
+    "destination_sha256": "bc99020f787be486384082d7bab911fc2ee04b9d44829cc27f5ddbe7bf5a76b1"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma_cmp_hiphi/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_c_1.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-hiphi-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_table_c_1.xml",
+    "sha256": "3d458132bb9d0c4d49b43e019261ed627a1e8fe3e5a783f1707303da8ada1037",
+    "destination_sha256": "3d458132bb9d0c4d49b43e019261ed627a1e8fe3e5a783f1707303da8ada1037"
+  }
+]
