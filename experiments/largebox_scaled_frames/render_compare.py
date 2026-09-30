@@ -32,7 +32,7 @@ model=base.omni_model(OBJECT,scale)
 model.vis.quality.shadowsize=1024
 
 def floor_clearances(q):
- scene=SOURCE_RENDER/'scenes/largebox_0cc890c8fcbbc79f.xml'
+ scene=Path(base.scale.scaled_scene(oldpkg/f'models/g1/g1_29dof_w_{OBJECT}.xml',OBJECT,scale,SOURCE_RENDER/'scenes'))
  model=mujoco.MjModel.from_xml_path(str(scene));data=mujoco.MjData(model)
  ground=model.geom('ground').id
  foot={side:[] for side in ('left','right')}
