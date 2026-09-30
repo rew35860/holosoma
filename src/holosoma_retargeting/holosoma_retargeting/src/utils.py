@@ -254,7 +254,14 @@ def preprocess_motion_data(
             from holosoma_retargeting.src.world_scaling import scale_object_poses
             object_poses = scale_object_poses(object_poses, scale, z_min)
             return human_joints, object_poses, extract_object_first_moving_frame(object_poses)
-        if object_scale_mode not in ("original", "object_scaled"):
+        if object_scale_mode == "object_scaled":
+            # Keep the unmodified OmniRetarget object-height rule while scaling
+            # the local mesh and collision/contact points in setup_object_data.
+            object_poses[:, -3:-1] *= scale
+            object_z0 = object_poses[0, -1]
+            object_poses[:, -1] = object_z0 + (object_poses[:, -1] - object_z0) * scale
+            return human_joints, object_poses, extract_object_first_moving_frame(object_poses)
+        if object_scale_mode != "original":
             raise ValueError(f"Unknown object_scale_mode: {object_scale_mode}")
         object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale
 

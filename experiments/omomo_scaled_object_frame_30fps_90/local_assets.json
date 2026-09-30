@@ -1,0 +1,62 @@
+[
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/largebox/largebox.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/largebox/largebox.obj",
+    "sha256": "dbcc11281f62e9226f49165252375080d2e490e5a3f0ab6ba917acbd8f7abc1c"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_largebox.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_largebox.xml",
+    "sha256": "13b0404edf67a87e09054ea878023a737e5bd6a943844d5387f209a44f24fc5c"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/plasticbox/plasticbox.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/plasticbox/plasticbox.obj",
+    "sha256": "96ec74b8bdbf0f01e3572134c0bcc4ac932ec94f45670ac6280b966d524849ab"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_plasticbox.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_plasticbox.xml",
+    "sha256": "21e9893a9a3bf356521683d7ddbe07d0830236908416aaef93eb4ed9a1f7e6b8"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/whitechair/whitechair.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/whitechair/whitechair.obj",
+    "sha256": "a1820e3b43d1ab8392f20a1dd4dba853abbab3327dfb0894a46314f7eeffe6df"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_whitechair.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_whitechair.xml",
+    "sha256": "eba87509ebde9ce050f1a1df3577eb9c5c4f99e575b2983d6d1ceecc090d71a5"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/woodchair/woodchair.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/woodchair/woodchair.obj",
+    "sha256": "c8e3eea6da9e7a8bd85e0eb42e973bab8029f9fa210b71d26dcbbdb934ac44ac"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_woodchair.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_woodchair.xml",
+    "sha256": "7e82b8169af5b2889fc53f58a882df9e63d43a48cf062ac2088b7aafb28373f2"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/smallbox/smallbox.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/smallbox/smallbox.obj",
+    "sha256": "d8683e85545857c872abaa1caab5d636c67e29cf296b561461f1106f5adc4b6f"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_smallbox.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_smallbox.xml",
+    "sha256": "a5a3b3e439ed3cf351b14bb1fe6cdde70921ad0182313146fe59fe9c6f394170"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/suitcase/suitcase.obj",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/suitcase/suitcase.obj",
+    "sha256": "dc701f2c56ebcb5d11398f75f353d1d685842aca9f6e98883cce80a2de01ad01"
+  },
+  {
+    "source": "/home/natcha/Downloads/holosoma-cmp-omomo-scaled/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_suitcase.xml",
+    "destination": "/home/natcha/Downloads/holosoma-cmp-omomo-object-frame/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_suitcase.xml",
+    "sha256": "e1397bc24abe1853d1b08b37ff0f24e58f41b0b788585046d72ad1fcbd575227"
+  }
+]
