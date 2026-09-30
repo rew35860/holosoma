@@ -20,8 +20,8 @@ class TaskConfig:
     # "multi_boxes" for climbing, "ground" for robot_only
     object_name: str | None = None
 
-    object_scale_mode: Literal["original", "world_scaled"] = "original"
-    """Apply the human world transform to object size and translation."""
+    object_scale_mode: Literal["original", "world_scaled", "object_scaled"] = "original"
+    """Choose native full size, uniform world scaling, or scaled mesh with native object height."""
 
     # Ground meshgrid (robot_only task)
     ground_size: int = 15

@@ -242,7 +242,7 @@ def preprocess_motion_data(
     # interact2mimic's smpl_2_mujoco_new: L_Wrist=17, R_Wrist=36.
     L_WRIST_IDX, R_WRIST_IDX = 17, 36
     hand_z_min_raw = (min(human_joints[0, L_WRIST_IDX, 2], human_joints[0, R_WRIST_IDX, 2])
-                      if object_scale_mode == "original" else 0.0)
+                      if object_scale_mode in ("original", "object_scaled") else 0.0)
 
     human_joints[:, :, 2] -= z_min
 
@@ -254,7 +254,7 @@ def preprocess_motion_data(
             from holosoma_retargeting.src.world_scaling import scale_object_poses
             object_poses = scale_object_poses(object_poses, scale, z_min)
             return human_joints, object_poses, extract_object_first_moving_frame(object_poses)
-        if object_scale_mode != "original":
+        if object_scale_mode not in ("original", "object_scaled"):
             raise ValueError(f"Unknown object_scale_mode: {object_scale_mode}")
         object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale
 

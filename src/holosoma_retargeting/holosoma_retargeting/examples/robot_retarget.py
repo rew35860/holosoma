@@ -340,7 +340,7 @@ def setup_object_data(
         object_local_pts, object_local_pts_demo = load_object_data(
             constants.OBJECT_MESH_FILE, smpl_scale=smpl_scale, sample_count=100
         )
-        if task_config.object_scale_mode == "world_scaled":
+        if task_config.object_scale_mode in ("world_scaled", "object_scaled"):
             from holosoma_retargeting.src.world_scaling import scaled_scene
             scene = constants.ROBOT_URDF_FILE.replace('.urdf', '_w_' + constants.OBJECT_NAME + '.xml')
             constants.SCENE_XML_FILE = scaled_scene(
