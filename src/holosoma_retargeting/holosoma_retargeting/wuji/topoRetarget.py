@@ -362,6 +362,8 @@ class TopoRetargeter:
             if not self.obj_geoms:
                 ob = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"{obj_name}_link")
                 self.obj_geoms = [g for g in range(model.ngeom) if int(model.geom_bodyid[g]) == ob]
+            if not self.obj_geoms:
+                raise ValueError(f"No collision geometry found for object {obj_name!r}; check the object name/model")
             self.finger_geoms = []
             if pen_coverage == "partial":                            # DIAGNOSTIC: reproduce the OLD coverage --
                 seen = set()                                         # one geom per finger-link body, no palm, no
