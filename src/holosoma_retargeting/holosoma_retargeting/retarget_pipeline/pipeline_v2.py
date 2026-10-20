@@ -26,6 +26,7 @@ sys.path.insert(0, str(PKG.parent))
 from holosoma_retargeting.wuji.topoRetarget import (
     exp_laplacian_matrix, wrist_frame, create_interaction_mesh, get_adjacency_list,
 )
+from holosoma_retargeting.retarget_pipeline.clarabel_step import make_settings, solve_clarabel_qp_step
 
 SIDES = ('left', 'right')
 PREFIX = ('wj_left', 'wjr_right')
@@ -171,11 +172,7 @@ class CoupledRefiner:
         self.is_plane = model.geom_type[self.pairs[:, 1]] == mujoco.mjtGeom.mjGEOM_PLANE
         self.pair_categories = {k: int(np.sum(self.pairs[:, 2] == i))
                                 for i, k in enumerate(('object', 'ground', 'self'))}
-        self.solver_settings = clarabel.DefaultSettings()
-        self.solver_settings.verbose = False
-        self.solver_settings.max_iter = 100
-        self.solver_settings.tol_gap_abs = 1e-7
-        self.solver_settings.tol_feas = 1e-7
+        self.solver_settings = make_settings(max_iter=100)
 
     def fk(self, q):
         self.d.qpos[:] = q
@@ -342,15 +339,9 @@ class CoupledRefiner:
         A = sparse.vstack([A, soc], format='csc')
         b = np.r_[b, self.cfg.trust_radius, np.zeros(n)]
         cones.append(clarabel.SecondOrderConeT(n+1))
-        solver = clarabel.DefaultSolver(sparse.triu(P).tocsc(), linear, A, b, cones, self.solver_settings)
-        result = solver.solve()
-        if str(result.status) not in ('Solved', 'AlmostSolved'):
-            raise RuntimeError(f'Joint refinement subproblem failed: {result.status}')
-        x = np.asarray(result.x)
-        if not np.isfinite(x).all():
-            raise RuntimeError('Nonfinite joint refinement step')
-        return x[:n], dict(status=str(result.status), slack_max_m=float(x[n:].max()) if k else 0.,
-                          solver_seconds=float(result.solve_time), collision_rows=k)
+        x, info = solve_clarabel_qp_step(P, linear, A, b, cones, self.solver_settings)
+        info.update(slack_max_m=float(x[n:].max()) if k else 0., collision_rows=k)
+        return x[:n], info
 
     def refine(self, body_Q, init_Q, human, O, pose, contact, surface, progress=None):
         Q = body_Q.copy()
