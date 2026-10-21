@@ -22,6 +22,12 @@ class PipelineConfig:
     dataset: str = "humoto"
     """Source dataset. 'humoto' now; other InterAct-format datasets later. Selects the raw data layout."""
 
+    floor_mode: Literal["auto", "source", "toe"] = "auto"
+    """PART 0 floor origin: auto preserves z=0 for HUMOTO inputs already grounded by
+    the importer; other datasets retain toe normalization. source applies scale
+    only; toe reproduces the legacy toe-joint/mat heuristic. Recorded in canonical
+    inputs. Changing this requires fresh body/hand solves in a new output folder."""
+
     robot: str = "g1"
     """Robot type (drives robot_height / scale via _ROBOT_DEFAULTS)."""
 

@@ -12,6 +12,7 @@ source, target, collision, render and the future RL env. Stages:
 
 Uniform floor-anchored transform (NO floor-rest z0 branch, NO double scaling):
     c = [0,0,z_min];  X_scaled = s*(X_raw - c);  quat unchanged;  object_local_scaled = s*object_local_raw
+    Already grounded HUMOTO inputs use z_min=0; toe normalization is an explicit legacy option.
 
 Run (omniretarget env):
     python retarget_pipeline/pipeline.py --task-name push_table_forward_with_both_hands-039 --stage part0 --data-path <dir>
@@ -41,6 +42,9 @@ from holosoma_retargeting.config_types.data_type import MotionDataConfig  # noqa
 from holosoma_retargeting.config_types.task import TaskConfig  # noqa: E402
 from holosoma_retargeting.retarget_pipeline.config_types.pipeline_config import PipelineConfig  # noqa: E402
 from holosoma_retargeting.retarget_pipeline import checks, report  # noqa: E402  (fail-loud checks + console reports)
+from holosoma_retargeting.retarget_pipeline.object_colliders import (
+    prepare_body_object_colliders, validate_body_object_colliders,
+)
 from holosoma_retargeting.examples.robot_retarget import (  # lazy: keep PART 0 free of the retargeter deps
     create_task_constants,
     build_retargeter_kwargs_from_config,
@@ -82,8 +86,18 @@ def validate_config(cfg: PipelineConfig) -> None:
         logger.warning("no hand keypoints (%s) -- PART 0/1 run body-only; PART 2/3 unavailable", handkp)
 
 
-def preprocess_motion_data_uniform(human_joints, hand_kp, object_poses, demo_joints, foot_names, scale, mat_height=0.1):
-    """Normalize joint heights to the floor, then uniformly scale x, y and z: X_scaled = s*(X - [0,0,z_min]).
+def resolve_floor_mode(mode: str, dataset: str) -> str:
+    """HUMOTO's importer grounds feet AND object; do not ground its toe joints again."""
+    if mode not in ("auto", "source", "toe"):
+        raise ValueError(f"Unknown floor mode: {mode}")
+    if mode == "auto":
+        return "source" if dataset.lower() == "humoto" or dataset.lower().startswith("humoto_") else "toe"
+    return mode
+
+
+def preprocess_motion_data_uniform(human_joints, hand_kp, object_poses, demo_joints, foot_names, scale, mat_height=0.1,
+                                   *, floor_mode="toe"):
+    """Apply one shared floor transform and uniform scale to the human and object.
 
     Args:
         human_joints (np.ndarray): Human joint positions (T, 52, 3).
@@ -93,16 +107,22 @@ def preprocess_motion_data_uniform(human_joints, hand_kp, object_poses, demo_joi
         foot_names (tuple): The two toe joint names defining the floor z_min.
         scale (float): Uniform scale factor s.
         mat_height (float): Mat thickness subtracted from z_min when the feet rest on a mat.
+        floor_mode (str): source preserves an already grounded scene's z=0; toe
+            uses the historical toe-joint heuristic. Default preserves the helper's
+            old API; PART 0 explicitly resolves its dataset-aware config.
 
     Returns:
         tuple: (hj_s, hk_s, obj_pose_muj, z_min).
     """
-    # Normalize human joint heights
-    toe_indices = [demo_joints.index(foot_names[0]), demo_joints.index(foot_names[1])]
-    z_min = float(human_joints[:, toe_indices, 2].min())
-    if z_min >= mat_height:
-        # On a mat.
-        z_min -= mat_height
+    if floor_mode == "source":
+        z_min = 0.0
+    elif floor_mode == "toe":
+        toe_indices = [demo_joints.index(foot_names[0]), demo_joints.index(foot_names[1])]
+        z_min = float(human_joints[:, toe_indices, 2].min())
+        if z_min >= mat_height:
+            z_min -= mat_height
+    else:
+        raise ValueError(f"Expected resolved floor mode 'source' or 'toe', got {floor_mode!r}")
 
     c = np.array([0.0, 0.0, z_min])
 
@@ -256,7 +276,13 @@ def build_scaled_model(cfg: PipelineConfig, stage: str, s: float) -> tuple[str, 
         raise ValueError(f"Stage-{stage} base model not found: {base}\n"
                          f"  build the '{cfg.object_name}' base (visible mesh + CoACD pieces), "
                          f"or pass --stage-{stage.lower()}-model-base <path>.")
+    if stage == "A":
+        base = Path(prepare_body_object_colliders(
+            base, scaled_model_path(cfg, stage).parent / "source_with_colliders" / base.name,
+            cfg.object_name, PKG / "models" / "decomp" / cfg.object_name))
     scaled, n = build_scaled_object_model(str(base), s, str(scaled_model_path(cfg, stage)), cfg.object_name)
+    if stage == "A":
+        validate_body_object_colliders(mujoco.MjModel.from_xml_path(scaled), cfg.object_name)
     return str(base), scaled, n
 
 
@@ -283,15 +309,31 @@ def part0(cfg: PipelineConfig, motion_cfg: MotionDataConfig, con: SimpleNamespac
     raw_hj, raw_hk, raw_obj = load_raw_motion(pt, handkp)
     T = len(raw_hj)
 
-    # normalize heights to the floor + uniform scale (mat-aware z_min from foot_names, like preprocess_motion_data)
+    # HUMOTO source is already grounded; toe joints are not foot-sole contact points.
+    floor_mode = resolve_floor_mode(cfg.floor_mode, cfg.dataset)
     hj_s, hk_s, obj_pose_muj, z_min = preprocess_motion_data_uniform(
         human_joints=raw_hj,
         hand_kp=raw_hk,
         object_poses=raw_obj,
         demo_joints=con.DEMO_JOINTS,
         foot_names=motion_cfg.toe_names,
-        scale=s
+        scale=s,
+        floor_mode=floor_mode,
     )
+
+    # Check all visible mesh vertices, not a sparse interaction-mesh sample.
+    # This input check is distinct from robot-ground benchmark metrics.
+    import trimesh
+    object_vertices = np.asarray(trimesh.load(f"{PKG}/{con.OBJECT_MESH_FILE}", force="mesh").vertices)
+    raw_bottom = checks.object_floor_heights(object_vertices, raw_obj[:, [4, 5, 6, 0, 1, 2, 3]])
+    scaled_bottom = checks.object_floor_heights(s*object_vertices, obj_pose_muj)
+    floor_tolerance = 1e-4  # 0.1 mm numerical allowance for this source-input check.
+    if floor_mode == "source" and scaled_bottom.min() < -floor_tolerance:
+        raise ValueError(f"Preserved source object crosses z=0 by {-scaled_bottom.min()*1000:.3f} mm. "
+                         "Correct the source scene's floor/mesh alignment before retargeting; "
+                         "do not snap the object independently of the human.")
+    logger.info("Floor mode=%s: raw/scaled object bottom minima %.3f/%.3f mm; shared z shift %.3f mm",
+                floor_mode, raw_bottom.min()*1000, scaled_bottom.min()*1000, z_min*1000)
 
     stand = float(raw_hj[:, :, 2].max() - z_min)
 
@@ -305,6 +347,9 @@ def part0(cfg: PipelineConfig, motion_cfg: MotionDataConfig, con: SimpleNamespac
              object_pose_mujoco=obj_pose_muj,
              object_points_scaled=obj_local_s, scale=s, z_min=z_min, frame_ids=np.arange(T), robot=cfg.robot,
              dataset=cfg.dataset, input_pt=pt, input_handkp=handkp, obj_mesh=con.OBJECT_MESH_FILE,
+             floor_mode=floor_mode, floor_mode_requested=cfg.floor_mode,
+             object_bottom_raw_m=raw_bottom, object_bottom_scaled_m=scaled_bottom,
+             object_floor_input_tolerance_m=floor_tolerance,
              stageA_model_base=str(resolve_model_base(cfg, "A")), stageB_model_base=str(resolve_model_base(cfg, "B")),
              transform="X_scaled = s*(X_raw - [0,0,z_min]); quat unchanged; UNIFORM floor-anchored")
 
@@ -359,12 +404,19 @@ def part1_stageA(cfg: PipelineConfig, motion_cfg: MotionDataConfig, con: SimpleN
     # touch in the source pose, so a positive clearance is infeasible (self-collision is hard, no slack).
     sc = SelfCollisionConfig(enable=cfg.self_collision, pairs=_ARM_TRUNK_PAIRS, tolerance=-0.005)
     kwargs = build_retargeter_kwargs_from_config(
-        retargeter_config=RetargeterConfig(penetration_tolerance=cfg.pen_tolerance, self_collision=sc),
+        retargeter_config=RetargeterConfig(penetration_tolerance=cfg.pen_tolerance, self_collision=sc,
+                                         activate_obj_non_penetration=True),
         constants=con,
         object_urdf_path=con.OBJECT_URDF_FILE,
         task_type="object_interaction",
     )
+    # Check old/reused part0 models too: never silently solve against a visual-only object.
+    coverage = validate_body_object_colliders(mujoco.MjModel.from_xml_path(str(scaled_a)), cfg.object_name)
+    logger.info("Stage-A object collision coverage: %s", coverage)
     retargeter = InteractionMeshRetargeter(**kwargs)
+    validate_body_object_colliders(retargeter.robot_model, cfg.object_name)
+    if not retargeter.activate_obj_non_penetration:
+        raise ValueError("Stage-A object non-penetration must remain enabled")
 
     # q_init + MuJoCo-order poses (feed scaled [quat,trans]; initialize_robot_pose converts to [trans,quat])
     obj_qt = obj_muj[:, [3, 4, 5, 6, 0, 1, 2]]

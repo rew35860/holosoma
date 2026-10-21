@@ -29,6 +29,22 @@ def assert_object_local_scaled(obj_local_s, obj_local_raw, s) -> None:
     assert np.allclose(obj_local_s, s * obj_local_raw, atol=1e-9), "object_local scaled != s*raw (double-scale)"
 
 
+def object_floor_heights(vertices, poses):
+    """Lowest visible mesh vertex per frame above z=0; poses are xyz + wxyz.
+
+    Uses every vertex with its rigid pose, preserving the object's local origin.
+    Does not change object poses or define a benchmark penetration metric.
+    """
+    vertices, poses = np.asarray(vertices), np.asarray(poses)
+    if vertices.ndim != 2 or vertices.shape[1] != 3 or not len(vertices):
+        raise ValueError("Object floor check needs nonempty mesh vertices of shape (N, 3)")
+    if poses.ndim != 2 or poses.shape[1] != 7 or not len(poses):
+        raise ValueError("Object floor check needs nonempty poses of shape (T, 7)")
+    if not np.isfinite(vertices).all() or not np.isfinite(poses).all() or np.any(np.linalg.norm(poses[:, 3:], axis=1) < 1e-9):
+        raise ValueError("Object floor check received invalid vertices/poses")
+    return np.array([(vertices @ _qmat(p[3:])[2]).min() + p[2] for p in poses])
+
+
 def _contact_offsets(hk, obj_pos, obj_q):
     """Right-hand wrist(kp0) & mean-fingertip vertical offset above the object origin, object-local, per frame."""
     w, f = [], []
